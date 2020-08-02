@@ -164,10 +164,20 @@ class UsersHttpResource:
             return json_response(
                 reason=f'{request_body.email} is invalid email format', status=400)
 
+        user: User = await find_user_by_id(user_info.id)
+        if not user:
+            return json_response(
+                reason=f'user not found', status=404)
+
+        verified_status = {}
+        if user.email != request_body.email:
+            verified_status['is_email_verified'] = False
+
         affected_rows = await update_user(
             user_id=user_info.id,
             email=request_body.email,
             extra=request_body.extra,
+            **verified_status,
         )
         return json_response(result=affected_rows > 0)
 
