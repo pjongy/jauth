@@ -52,7 +52,12 @@ class UsersHttpResource:
     @request_error_handler
     async def get_user(self, request):
         user_id = request.match_info['user_id']
-        # TODO: Find user by user_id and response user information
+        user = await find_user_by_id(user_id)
+        if not user:
+            return json_response(
+                reason=f'user not found', status=404)
+
+        return json_response(result=user_model_to_dict(user))
 
     @request_error_handler
     async def create_third_party_user(self, request):
