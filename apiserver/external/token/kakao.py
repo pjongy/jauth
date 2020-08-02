@@ -64,7 +64,7 @@ class KakaoToken(Request):
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': kakao_user.kakao_account.email,
-            'third_party_user_id': kakao_user.id,
+            'id': kakao_user.id,
             'type': UserType.KAKAO,
             'name': kakao_user.kakao_account.profile.nickname,
             'image_url': kakao_user.kakao_account.profile.profile_image_url,

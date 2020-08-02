@@ -122,7 +122,7 @@ class TokenHttpResource:
             return json_response(reason='invalid third party token', status=400)
 
         user: User = await find_user_by_third_party_user_id(
-            third_party_user_id=third_party_user.third_party_user_id,
+            third_party_user_id=third_party_user.id,
             user_type=request_body.user_type,
         )
 

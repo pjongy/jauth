@@ -58,6 +58,6 @@ class AppleToken(Request):
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': apple_user.email,
-            'third_party_user_id': apple_user.sub,
+            'id': apple_user.sub,
             'type': UserType.APPLE,
         })

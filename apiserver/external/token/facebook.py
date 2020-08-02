@@ -67,7 +67,7 @@ class FacebookToken(Request):
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': facebook_user.email,
-            'third_party_user_id': facebook_user.id,
+            'id': facebook_user.id,
             'type': UserType.FACEBOOK,
             'name': facebook_user.name,
             'image_url': facebook_user.picture.data.url,
