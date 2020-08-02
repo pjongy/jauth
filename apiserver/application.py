@@ -4,6 +4,7 @@ import aioredis
 from aiohttp import web
 
 from apiserver.config import config
+from apiserver.resource.users import UsersHttpResource
 from common.logger.logger import get_logger
 from common.storage.init import init_db
 
@@ -45,6 +46,7 @@ async def application():
     external = {}
     secret = {}
     resource_list = {
+        '/users': UsersHttpResource,
     }
 
     for path, resource in resource_list.items():
