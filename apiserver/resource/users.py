@@ -50,6 +50,7 @@ class UsersHttpResource:
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
             UserType.KAKAO: external['third_party']['kakao'].get_user,
             UserType.APPLE: external['third_party']['apple'].get_user,
+            UserType.GOOGLE: external['third_party']['google'].get_user,
         }
 
     def route(self):

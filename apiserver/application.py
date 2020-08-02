@@ -7,6 +7,7 @@ from aioredis import ConnectionsPool
 from apiserver.config import config
 from apiserver.external.token.apple import AppleToken
 from apiserver.external.token.facebook import FacebookToken
+from apiserver.external.token.google import GoogleToken
 from apiserver.external.token.kakao import KakaoToken
 from apiserver.resource.token import TokenHttpResource
 from apiserver.resource.users import UsersHttpResource
@@ -53,6 +54,7 @@ async def application():
             'facebook': FacebookToken(),
             'kakao': KakaoToken(),
             'apple': AppleToken(),
+            'google': GoogleToken(),
         },
     }
     secret = {
