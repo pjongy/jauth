@@ -38,6 +38,7 @@ services:
       - 80:8080
     environment:
       ENV: dev
+      API_SERVER__JWT_SECRET: jwt_secret
       API_SERVER__MYSQL__HOST: 172.13.1.2
       API_SERVER__MYSQL__USER: root
       API_SERVER__MYSQL__PASSWORD: mysql_password

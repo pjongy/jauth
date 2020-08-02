@@ -2,8 +2,13 @@ import aiohttp_cors
 
 import aioredis
 from aiohttp import web
+from aioredis import ConnectionsPool
 
 from apiserver.config import config
+from apiserver.external.token.apple import AppleToken
+from apiserver.external.token.facebook import FacebookToken
+from apiserver.external.token.kakao import KakaoToken
+from apiserver.resource.token import TokenHttpResource
 from apiserver.resource.users import UsersHttpResource
 from common.logger.logger import get_logger
 from common.storage.init import init_db
@@ -30,7 +35,7 @@ async def application():
 
     redis_config = config.api_server.redis
 
-    token_cache = await aioredis.create_pool(
+    token_cache: ConnectionsPool = await aioredis.create_pool(
         f'redis://{redis_config.host}:{redis_config.port}',
         password=redis_config.password,
         minsize=5,
@@ -43,10 +48,19 @@ async def application():
             'token_cache': token_cache,
         }
     }
-    external = {}
-    secret = {}
+    external = {
+        'third_party': {
+            'facebook': FacebookToken(),
+            'kakao': KakaoToken(),
+            'apple': AppleToken(),
+        },
+    }
+    secret = {
+        'jwt_secret': config.api_server.jwt_secret,
+    }
     resource_list = {
         '/users': UsersHttpResource,
+        '/token': TokenHttpResource,
     }
 
     for path, resource in resource_list.items():

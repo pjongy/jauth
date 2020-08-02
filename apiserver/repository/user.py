@@ -1,6 +1,6 @@
 from tortoise import QuerySet
 
-from common.model.user import User, UserType
+from common.model.user import User, UserType, UserStatus
 
 
 def user_model_to_dict(row: User):
@@ -13,6 +13,9 @@ def user_model_to_dict(row: User):
         'created_at': row.created_at,
         'modified_at': row.modified_at,
     }
+
+    if row.type == UserType.EMAIL:
+        user_dict['account'] = row.account
 
     if row.type != UserType.EMAIL:
         user_dict['third_party_user_id'] = row.third_party_user_id
@@ -38,6 +41,16 @@ async def find_user_by_account(account: str) -> User:
     return await _user_relational_query_set(
         User.filter(
             account=account
+        )
+    ).first()
+
+
+async def find_user_by_third_party_user_id(user_type: UserType, third_party_user_id: str) -> User:
+    return await _user_relational_query_set(
+        User.filter(
+            third_party_user_id=third_party_user_id,
+            type=user_type,
+            status=UserStatus.NORMAL,
         )
     ).first()
 

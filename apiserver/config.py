@@ -32,6 +32,7 @@ class Config:
 
         mysql: MySQL
         redis: Redis
+        jwt_secret: str
         port: int
     api_server: APIServer
 
