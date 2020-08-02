@@ -1,6 +1,6 @@
 import deserialize
 
-from apiserver.exception.thirdparty import ThirdPartyTokenVerifyError
+from apiserver.exception.third_party import ThirdPartyTokenVerifyError
 from apiserver.external.token import ThirdPartyUser
 from common.request import Request
 from common.model.user import UserType
