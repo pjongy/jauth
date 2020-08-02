@@ -95,8 +95,12 @@ def object_to_dict(obj) -> dict:
     return result
 
 
-def is_valid_email(email):
+def is_valid_email(email: str):
     return re.match(email_validator, email) is not None
+
+
+def is_valid_account(account: str):
+    return account.isalnum()
 
 
 def is_valid_password(password: str) -> bool:

@@ -1,14 +1,20 @@
+import bcrypt
 import deserialize
 
 from apiserver.decorator.request import request_error_handler
-from apiserver.resource import convert_request
+from apiserver.repository.user import find_user_by_id, user_model_to_dict, find_user_by_account, \
+    create_user
+from apiserver.resource import convert_request, json_response
 from common.logger.logger import get_logger
+from common.model.user import UserType
+from common.util import is_valid_email, is_valid_password, is_valid_account
 
 logger = get_logger(__name__)
 
 
 @deserialize.default('extra', {})
 class CreateEmailUserRequest:
+    account: str
     email: str
     password: str
     extra: dict
@@ -50,24 +56,52 @@ class UsersHttpResource:
 
     @request_error_handler
     async def create_third_party_user(self, request):
-        request: CreateEmailUserRequest = convert_request(
-            CreateEmailUserRequest,
+        request_body: CreateThirdPartyUserRequest = convert_request(
+            CreateThirdPartyUserRequest,
             await request.json()
         )
         # TODO: Create third party user by user_id and response user information
 
     @request_error_handler
     async def create_email_user(self, request):
-        request: CreateThirdPartyUserRequest = convert_request(
-            CreateThirdPartyUserRequest,
+        request_body: CreateEmailUserRequest = convert_request(
+            CreateEmailUserRequest,
             await request.json()
         )
-        # TODO: Create email user by user_id and response user information
+
+        user = await find_user_by_account(request_body.account)
+        if user:
+            return json_response(
+                reason=f'account[{request_body.account}] already exists', status=409)
+
+        if not is_valid_account(request_body.account):
+            return json_response(
+                reason=f'{request_body.account} is invalid account format', status=400)
+
+        if not is_valid_email(request_body.email):
+            return json_response(
+                reason=f'{request_body.email} is invalid email format', status=400)
+
+        if not is_valid_password(request_body.password):
+            return json_response(reason='password policy is not satisfied', status=400)
+
+        hashed_password = bcrypt.hashpw(
+            request_body.password.encode(),
+            bcrypt.gensalt()
+        ).decode()
+        user = await create_user(
+            user_type=UserType.EMAIL,
+            account=request_body.account,
+            hashed_password=hashed_password,
+            email=request_body.email,
+            extra=request_body.extra,
+        )
+        return json_response(result=user_model_to_dict(user))
 
     @request_error_handler
     async def update_user(self, request):
         user_id = request.match_info['user_id']
-        request: UpdateUserRequest = convert_request(
+        request_body: UpdateUserRequest = convert_request(
             UpdateUserRequest,
             await request.json()
         )
@@ -76,7 +110,7 @@ class UsersHttpResource:
     @request_error_handler
     async def update_email_user_password(self, request):
         user_id = request.match_info['user_id']
-        request: UpdateUserPasswordRequest = convert_request(
+        request_body: UpdateUserPasswordRequest = convert_request(
             UpdateUserPasswordRequest,
             await request.json()
         )
