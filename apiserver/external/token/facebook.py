@@ -63,7 +63,7 @@ class FacebookToken(Request):
         if not 200 <= status < 300:
             raise ThirdPartyTokenVerifyError(f'Status is not OK: {status} / {response}')
 
-        facebook_user = deserialize.deserialize(FacebookUser, response)
+        facebook_user: FacebookUser = deserialize.deserialize(FacebookUser, response)
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': facebook_user.email,

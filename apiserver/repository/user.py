@@ -10,6 +10,7 @@ def user_model_to_dict(row: User):
         'type': row.type,
         'status': row.status,
         'extra': row.extra,
+        'is_email_verified': row.is_email_verified,
         'created_at': row.created_at,
         'modified_at': row.modified_at,
     }

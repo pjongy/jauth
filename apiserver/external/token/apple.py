@@ -54,10 +54,12 @@ class AppleToken(Request):
         except BaseException:
             raise ThirdPartyTokenVerifyError("invalid jwt")
 
-        apple_user = deserialize.deserialize(AppleUser, jwt.json_decode(apple_jwt.claims))
+        apple_user: AppleUser = deserialize.deserialize(
+            AppleUser, jwt.json_decode(apple_jwt.claims))
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': apple_user.email,
             'id': apple_user.sub,
             'type': UserType.APPLE,
+            'is_email_verified': apple_user.email_verified,
         })
