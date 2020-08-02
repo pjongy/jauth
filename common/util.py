@@ -1,5 +1,6 @@
 import datetime
 import random
+import re
 import string
 
 from dateutil.parser import parse
@@ -8,6 +9,10 @@ from common.exception.parser import DatetimeParsingError
 
 KST = datetime.timezone(datetime.timedelta(hours=9), 'KST')
 UTC = datetime.timezone(datetime.timedelta(hours=0), 'UTC')
+email_validator = re.compile(
+    r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$',
+    re.IGNORECASE
+)
 
 
 def json_encoder(o):
@@ -88,3 +93,11 @@ def object_to_dict(obj) -> dict:
             element = object_to_dict(val)
         result[key] = element
     return result
+
+
+def is_valid_email(email):
+    return re.match(email_validator, email) is not None
+
+
+def is_valid_password(password: str) -> bool:
+    return len(password) >= 8
