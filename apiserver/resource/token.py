@@ -16,7 +16,7 @@ from apiserver.resource import json_response, convert_request
 from apiserver.structure.token.user import UserClaim, get_bearer_token
 from common.logger.logger import get_logger
 from common.model.user import UserType, User
-from common.util import object_to_dict
+from common.util import object_to_dict, to_string
 
 logger = get_logger(__name__)
 
@@ -145,11 +145,12 @@ class TokenHttpResource:
 
         user_id = await self.get_user_id_by_refresh_token(request_body.refresh_token)
         if user_id is None:
-            return json_response(reason='user not found', status=404)
+            return json_response(reason='token not found', status=404)
 
-        user = await find_user_by_id(user_id)
-        if user is None:
-            return json_response(reason='user not found', status=404)
+        user = await find_user_by_id(to_string(user_id))
+        if not user:
+            return json_response(
+                reason=f'user not found', status=404)
 
         access_token = self._create_access_token(user)
         return json_response(result={
