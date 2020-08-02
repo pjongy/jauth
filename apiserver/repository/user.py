@@ -74,3 +74,14 @@ async def create_user(
         third_party_user_id=third_party_user_id,
         extra=extra,
     )
+
+
+async def update_user(
+    user_id: str,
+    **kwargs
+) -> int:
+    return await User.filter(
+        id=user_id
+    ).update(
+        **kwargs
+    )
