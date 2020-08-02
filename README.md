@@ -11,6 +11,25 @@
 $ docker-compose -f local-docker-compose.yml up -d
 ```
 
+## API server
+
+### Run server
+```
+$ export ENV=dev
+$ export API_SERVER__JWT_SECRET={...JWT SECRET....}
+$ export API_SERVER__MYSQL__HOST={...}
+$ export API_SERVER__MYSQL__USER={...}
+$ export API_SERVER__MYSQL__PASSWORD={...}
+$ export API_SERVER__REDIS__HOST={...}
+$ export API_SERVER__REDIS__PASSWORD={...}
+$ python3 -m apiserver
+```
+
+### Run worker with docker-compose in local
+```
+$ docker-compose -f local-docker-compose.yml up -d api-server
+```
+
 ## Project structure
 ```
 /
