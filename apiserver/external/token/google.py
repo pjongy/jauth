@@ -6,12 +6,14 @@ from common.request import Request
 from common.model.user import UserType
 
 
+@deserialize.default('sub', '')
 @deserialize.default('email', '')
 @deserialize.default('email_verified', False)
 @deserialize.default('name', '')
 @deserialize.default('picture', '')
 @deserialize.default('locale', '')
 class GoogleUser:
+    sub: str
     email: str
     email_verified: bool
     name: str
@@ -38,7 +40,7 @@ class GoogleToken(Request):
 
         return deserialize.deserialize(ThirdPartyUser, {
             'email': google_user.email,
-            'id': google_user.id,
+            'id': google_user.sub,
             'type': UserType.GOOGLE,
             'name': google_user.name,
             'image_url': google_user.picture,
