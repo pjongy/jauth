@@ -107,6 +107,23 @@ class UserStatus(enum.IntEnum):
         }
         ```
 
+  - /-/self/:verify *GET*
+    - purpose: Verify user with email (Set is_email_verified as True)
+    - query_string:
+        ```
+        temp_token: ...temp generated JWT token for verify user
+        ```
+    - request: `Empty`
+    - request-header: `Empty`
+    - response:
+        ```
+        {
+          "success": ...,
+          "result": ...[bool],
+          "reason": ...,
+        }
+        ```
+
   - /email/self/password *PUT*
     - purpose: Update email user's password
     - request:
@@ -204,6 +221,33 @@ class UserStatus(enum.IntEnum):
           "result": {
             "access_token": ...[str]
           },
+          "reason": ...,
+        }
+        ```
+
+
+### Internal method
+
+- /internal
+  - /token/email_verify *POST*
+    - purpose: Create temp token for `/user/-/self/:verify`
+    - request:
+        ```
+        {
+          "user_id": ...[str],
+        }
+        ```
+    - request-header:
+        ```
+        {
+          "X-Server-Key": ... internal access key (setup by config when jauth start up) ...[str]
+        }
+        ```
+    - response:
+        ```
+        {
+          "success": ...,
+          "result": ...token for verify email ...[str],
           "reason": ...,
         }
         ```
