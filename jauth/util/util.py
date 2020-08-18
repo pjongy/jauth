@@ -5,7 +5,7 @@ import string
 
 from dateutil.parser import parse
 
-from jauth.util.exception import DatetimeParsingError
+from jauth.util.exception.parser import DatetimeParsingError
 
 KST = datetime.timezone(datetime.timedelta(hours=9), 'KST')
 UTC = datetime.timezone(datetime.timedelta(hours=0), 'UTC')

@@ -2,7 +2,7 @@ import deserialize
 
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.token import ThirdPartyUser
-from jauth.util import Request
+from jauth.util.request import Request
 from jwcrypto import jwt, jwk
 import jwt as pyjwt
 

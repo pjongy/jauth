@@ -12,7 +12,7 @@ from jauth.external.token.kakao import KakaoToken
 from jauth.resource.token import TokenHttpResource
 from jauth.resource.users import UsersHttpResource
 from jauth.util.logger.logger import get_logger
-from jauth.util.storage import init_db
+from jauth.util.storage.init import init_db
 
 
 def plugin_app(app, prefix, nested, keys=()):

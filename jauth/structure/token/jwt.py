@@ -5,7 +5,7 @@ import jwt
 from jwt import PyJWTError
 
 from jauth.exception.token import InvalidTokenException, TokenExpiredException
-from jauth.util import object_to_dict
+from jauth.util.util import object_to_dict
 
 
 @deserialize.parser('exp', int)

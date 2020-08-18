@@ -4,7 +4,7 @@ from uuid import UUID
 from tortoise import fields
 from tortoise.models import Model
 
-from jauth.util.model import TimestampMixin
+from jauth.util.model.mixin import TimestampMixin
 
 
 class UserType(enum.IntEnum):

@@ -16,7 +16,7 @@ from jauth.resource import json_response, convert_request
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
 from jauth.util.model.user import UserType, User
-from jauth.util import object_to_dict, to_string
+from jauth.util.util import object_to_dict, to_string
 
 logger = get_logger(__name__)
 

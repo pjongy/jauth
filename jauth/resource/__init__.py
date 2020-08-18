@@ -7,7 +7,7 @@ from aiohttp import web
 
 from jauth.exception.request import IncompleteParameterError, TypeConvertError
 from jauth.util.logger.logger import get_logger
-from jauth.util import datetime_to_kst_datetime, datetime_to_utc_datetime
+from jauth.util.util import datetime_to_kst_datetime, datetime_to_utc_datetime
 
 logger = get_logger(__name__)
 
