@@ -8,6 +8,7 @@ from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import find_user_by_id, user_model_to_dict, find_user_by_account, \
     create_user, find_user_by_third_party_user_id, update_user
 from jauth.resource import convert_request, json_response
+from jauth.structure.token.temp import VerifyUserEmailClaim
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
 from jauth.model.user import UserType, User
@@ -42,6 +43,10 @@ class UpdateUserPasswordRequest:
     new_password: str
 
 
+class VerifyEmailRequest:
+    temp_token: str
+
+
 class UsersHttpResource:
     def __init__(self, router, storage, secret, external):
         self.router = router
@@ -59,6 +64,7 @@ class UsersHttpResource:
         self.router.add_route('GET', '/-/self', self.get_myself)
         self.router.add_route('PUT', '/-/self', self.update_myself)
         self.router.add_route('GET', '/-/{user_id}', self.get_user)
+        self.router.add_route('GET', '/-/self/:verify', self.verify_myself)
         self.router.add_route('PUT', '/email/self/password', self.update_email_user_password)
 
     @token_error_handler
@@ -180,6 +186,24 @@ class UsersHttpResource:
             **verified_status,
         )
         return json_response(result=affected_rows > 0)
+
+    @token_error_handler
+    @request_error_handler
+    async def verify_myself(self, request):
+        request_param: VerifyEmailRequest = convert_request(
+            VerifyEmailRequest, dict(request.rel_url.query))
+        user_info: VerifyUserEmailClaim = VerifyUserEmailClaim.from_jwt(
+            request_param.temp_token, self.jwt_secret)
+        user: User = await find_user_by_id(user_info.id)
+
+        if not user:
+            return json_response(reason=f'user not found', status=404)
+
+        await update_user(
+            user_id=user_info.id,
+            is_email_verified=True,
+        )
+        return json_response(result=True)
 
     @token_error_handler
     @request_error_handler

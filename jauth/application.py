@@ -9,6 +9,7 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
+from jauth.resource.internal import InternalHttpResource
 from jauth.resource.token import TokenHttpResource
 from jauth.resource.users import UsersHttpResource
 from jauth.util.logger.logger import get_logger
@@ -63,6 +64,7 @@ async def application():
     resource_list = {
         '/users': UsersHttpResource,
         '/token': TokenHttpResource,
+        '/internal': InternalHttpResource,
     }
 
     for path, resource in resource_list.items():
