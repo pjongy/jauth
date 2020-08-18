@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 import deserialize
 
@@ -6,6 +7,8 @@ from jauth.util.configutil import get_config
 
 
 class Config:
+    @deserialize.default('internal_api_keys', [])
+    @deserialize.parser('internal_api_keys', lambda arg: arg.split(','))
     @deserialize.default('port', 8080)
     @deserialize.parser('port', int)
     class APIServer:
@@ -34,6 +37,8 @@ class Config:
         redis: Redis
         jwt_secret: str
         port: int
+        internal_api_keys: List[str]  # comma separated string to list
+
     api_server: APIServer
 
 
