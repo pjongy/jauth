@@ -11,6 +11,7 @@ class Config:
     @deserialize.parser('internal_api_keys', lambda arg: arg.split(','))
     @deserialize.default('port', 8080)
     @deserialize.parser('port', int)
+    @deserialize.default('logging_level', 'DEBUG')
     class APIServer:
         @deserialize.default('port', 3306)
         @deserialize.parser('port', int)
@@ -38,6 +39,7 @@ class Config:
         jwt_secret: str
         port: int
         internal_api_keys: List[str]  # comma separated string to list
+        logging_level: str
 
     api_server: APIServer
 
