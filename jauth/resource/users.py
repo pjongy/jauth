@@ -10,7 +10,7 @@ from jauth.repository.user import find_user_by_id, user_model_to_dict, find_user
 from jauth.resource import convert_request, json_response
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
-from jauth.util.model.user import UserType, User
+from jauth.model.user import UserType, User
 from jauth.util.util import is_valid_email, is_valid_password, is_valid_account
 
 logger = get_logger(__name__)

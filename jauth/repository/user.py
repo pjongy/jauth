@@ -1,6 +1,6 @@
 from tortoise import QuerySet
 
-from jauth.util.model.user import User, UserType, UserStatus
+from jauth.model.user import User, UserType, UserStatus
 
 
 def user_model_to_dict(row: User):

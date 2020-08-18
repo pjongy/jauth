@@ -3,7 +3,7 @@ import deserialize
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.token import ThirdPartyUser
 from jauth.util.request import Request
-from jauth.util.model.user import UserType
+from jauth.model.user import UserType
 
 
 @deserialize.default('sub', '')

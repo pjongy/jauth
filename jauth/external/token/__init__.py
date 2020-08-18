@@ -1,6 +1,6 @@
 import deserialize
 
-from jauth.util.model.user import UserType
+from jauth.model.user import UserType
 
 
 @deserialize.default('id', '')

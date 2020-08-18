@@ -15,7 +15,7 @@ from jauth.repository.user import find_user_by_third_party_user_id, find_user_by
 from jauth.resource import json_response, convert_request
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
-from jauth.util.model.user import UserType, User
+from jauth.model.user import UserType, User
 from jauth.util.util import object_to_dict, to_string
 
 logger = get_logger(__name__)

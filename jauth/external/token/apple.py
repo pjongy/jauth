@@ -6,7 +6,7 @@ from jauth.util.request import Request
 from jwcrypto import jwt, jwk
 import jwt as pyjwt
 
-from jauth.util.model.user import UserType
+from jauth.model.user import UserType
 
 
 @deserialize.default('iss', '')
