@@ -9,10 +9,12 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
+from jauth.resource.internal import InternalHttpResource
 from jauth.resource.token import TokenHttpResource
 from jauth.resource.users import UsersHttpResource
 from jauth.util.logger.logger import get_logger
 from jauth.util.storage.init import init_db
+from jauth.util.util import object_to_dict
 
 
 def plugin_app(app, prefix, nested, keys=()):
@@ -25,6 +27,7 @@ async def application():
     logger = get_logger(__name__)
 
     app = web.Application(logger=logger)
+    logger.debug(object_to_dict(config))
     mysql_config = config.api_server.mysql
     await init_db(
         host=mysql_config.host,
@@ -59,10 +62,12 @@ async def application():
     }
     secret = {
         'jwt_secret': config.api_server.jwt_secret,
+        'internal_api_keys': config.api_server.internal_api_keys,
     }
     resource_list = {
         '/users': UsersHttpResource,
         '/token': TokenHttpResource,
+        '/internal': InternalHttpResource,
     }
 
     for path, resource in resource_list.items():
