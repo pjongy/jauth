@@ -1,6 +1,21 @@
-# jauth
-- ***Installable user authorization/authentication service*** even contains third party users like Google, Facebook, Apple ...
+<div align="center">
+  <br/>
+  <img src="./docs/image/jauth-logo.png" width="200"/>
+  <br/>
+  <br/>
+  <p>
+    Installable user authorization / authentication service  <br/>
+    even contains third party users like Google, Facebook, Apple ...  
+  </p>
+  <p>
+    <a href="https://github.com/pjongy/jraze/blob/master/LICENSE">
+      <img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
+    </a>
+  </p>
+</div>
 
+
+---
 
 ## Quick start (on local)
 
