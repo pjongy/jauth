@@ -183,7 +183,7 @@ class UserStatus(enum.IntEnum):
         ```
     - response: `Same as /token/email POST response`
 
-  - /self *POST*
+  - /self *GET*
     - purpose: Verify access_token and get token's information (claim)
     - request: `Empty`
     - request-header:
