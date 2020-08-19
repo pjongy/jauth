@@ -8,7 +8,7 @@
     even contains third party users like Google, Facebook, Apple ...  
   </p>
   <p>
-    <a href="https://github.com/pjongy/jraze/blob/master/LICENSE">
+    <a href="https://github.com/pjongy/jauth/blob/master/LICENSE">
       <img src="https://img.shields.io/badge/license-MIT-blue.svg"/>
     </a>
   </p>
