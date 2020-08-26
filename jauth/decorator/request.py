@@ -26,6 +26,10 @@ def request_error_handler(func):
             error_msg = str(e)
             status = 400
             logger.error(e)
+        except BaseException as e:
+            error_msg = 'Unknown error'
+            status = 500
+            logger.error(e)
 
         return web.Response(
             body=json.dumps({
