@@ -1,6 +1,10 @@
+from typing import List, Tuple
+
 from tortoise import QuerySet
+from tortoise.query_utils import Q
 
 from jauth.model.user import User, UserType, UserStatus
+from jauth.structure.datetime_range import DatetimeRange
 
 
 def user_model_to_dict(row: User):
@@ -54,6 +58,68 @@ async def find_user_by_third_party_user_id(user_type: UserType, third_party_user
             status=UserStatus.NORMAL,
         )
     ).first()
+
+
+async def search_users(
+    emails: List[str] = (),
+    created_at_range: DatetimeRange = None,
+    modified_at_range: DatetimeRange = None,
+    extra_text: List[str] = (),
+    start: int = 0,
+    size: int = 10,
+    order_bys: List[str] = (),
+    status: List[int] = (),
+    types: List[int] = ()
+) -> Tuple[int, List[User]]:
+    if not status:
+        status = [UserStatus.NORMAL]
+    else:
+        status = [UserStatus(e) for e in status]
+
+    filters = []
+    if extra_text:
+        filters.append(Q(
+            *[Q(extra__contains=word) for word in extra_text],
+            join_type='OR'
+        ))
+
+    if emails:
+        filters.append(Q(
+            *[Q(email=email) for email in emails],
+            join_type='OR'
+        ))
+
+    if created_at_range:
+        filters.append(Q(
+            created_at__gte=created_at_range.start,
+            created_at__lte=created_at_range.end
+        ))
+
+    if modified_at_range:
+        filters.append(Q(
+            modified_at__gte=modified_at_range.start,
+            modified_at__lte=modified_at_range.end
+        ))
+
+    if types:
+        filters.append(Q(
+            *[Q(type=type_) for type_ in types],
+            join_type='OR'
+        ))
+
+    query_set = _user_relational_query_set(
+        User.filter(
+            Q(*filters)
+        ).filter(status__in=status)
+    ).all()
+
+    for order_by in order_bys:
+        if order_by.isascii():
+            query_set = query_set.order_by(order_by)
+    return (
+        await query_set.count(),
+        await query_set.offset(start).limit(size).all()
+    )
 
 
 async def create_user(

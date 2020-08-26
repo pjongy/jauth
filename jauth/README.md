@@ -251,3 +251,72 @@ class UserStatus(enum.IntEnum):
           "reason": ...,
         }
         ```
+
+  - /users:search *POST*
+    - purpose: Find users who fit filters
+    - misc:
+        ```
+        available_order_bys = {
+            'id', '-id',
+            'email', '-email',
+            'created_at', '-created_at',
+            'modified_at', '-modified_at'
+        }
+        ```
+    - request:
+        ```
+        {
+            "start": ...Fetch start index...[int],
+            "size": ...Fetch size...[int],
+            "emails": [
+                ...email...[str]
+            ],
+            "created_at_range": {
+                "start": ...iso 8601 format...[str],
+                "end": ...iso 8601 format...[str],
+            },
+            "modified_at_range": {
+                "start": ...iso 8601 format...[str],
+                "end": ...iso 8601 format...[str],
+            },
+            "order_bys": [
+                ...order by field name...[str]
+            ],
+            "status": [
+                ...UserStatus number...[int]
+            ],
+            "types": [
+                ...UserType number...[int]
+            ]
+        }
+        ```
+    - request-header:
+        ```
+        {
+          "X-Server-Key": ... internal access key (setup by config when jauth start up) ...[str]
+        }
+        ```
+    - response:
+        ```
+        {
+          "success": ...,
+          "result": {
+            "total": ...[int],
+            "users": [
+                {
+                    "id": ...uuid of user...[str],
+                    "email": ...[str],
+                    "type": ...enum value of UserType...[int],
+                    "status": ...enum value of UserStatus...[int],
+                    "extra": ...extra field for free using...[dict],
+                    "is_email_verified": ...flag for email verified status...[bool],
+                    "created_at": ...iso 8601 format...[str],
+                    "modified_at": ...iso 8601 format...[str],
+                    "account": ...optional existing for email user...[str],
+                    "third_party_user_id": ...optional existing for non-email user...[str],
+                }
+            ]
+          },
+          "reason": ...,
+        }
+        ```
