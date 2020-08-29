@@ -11,14 +11,18 @@ from jauth.exception.permission import ServerKeyError
 from jauth.repository.user import find_user_by_id, search_users, user_model_to_dict
 from jauth.resource import json_response, convert_request
 from jauth.structure.datetime_range import DatetimeRange
-from jauth.structure.token.temp import VerifyUserEmailClaim
+from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
 from jauth.util.logger.logger import get_logger
-from jauth.model.user import User
+from jauth.model.user import User, UserType
 
 logger = get_logger(__name__)
 
 
 class CreateEmailVerifyingTokenRequest:
+    user_id: str
+
+
+class CreatePasswordResetTokenRequest:
     user_id: str
 
 
@@ -54,19 +58,12 @@ class InternalHttpResource:
     def route(self):
         self.router.add_route('POST', '/users:search', self.search_users)
         self.router.add_route('POST', '/token/email_verify', self.generate_email_verifying_token)
+        self.router.add_route('POST', '/users/password:reset', self.generate_password_reset_token)
 
     def _check_server_key(self, request: Request):
         x_server_key = request.headers.get('X-Server-Key')
         if x_server_key not in self.internal_api_keys:
             raise ServerKeyError()
-
-    def _create_access_token(self, user: User) -> str:
-        user_claim: VerifyUserEmailClaim = deserialize.deserialize(VerifyUserEmailClaim, {
-            'id': str(user.id),
-            'type': int(user.type),
-            'exp': time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
-        })
-        return user_claim.to_jwt(self.jwt_secret)
 
     @token_error_handler
     @request_error_handler
@@ -77,7 +74,43 @@ class InternalHttpResource:
         request_body: CreateEmailVerifyingTokenRequest = convert_request(
             CreateEmailVerifyingTokenRequest, await request.json())
         user: User = await find_user_by_id(request_body.user_id)
-        token = self._create_access_token(user)
+        if not user:
+            return json_response(
+                reason=f'user not found', status=404)
+
+        user_claim: VerifyUserEmailClaim = deserialize.deserialize(VerifyUserEmailClaim, {
+            'id': str(user.id),
+            'type': int(user.type),
+            'exp': time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
+        })
+        token = user_claim.to_jwt(self.jwt_secret)
+
+        return json_response(result=token)
+
+    @token_error_handler
+    @request_error_handler
+    @restrict_external_request_handler
+    async def generate_password_reset_token(self, request):
+        self._check_server_key(request=request)
+
+        request_body: CreatePasswordResetTokenRequest = convert_request(
+            CreatePasswordResetTokenRequest, await request.json())
+        user: User = await find_user_by_id(request_body.user_id)
+        if not user:
+            return json_response(
+                reason=f'user not found', status=404)
+
+        if user.type != UserType.EMAIL:
+            return json_response(
+                reason=f'only email user can reset password', status=400)
+
+        user_claim: ResetPasswordClaim = deserialize.deserialize(ResetPasswordClaim, {
+            'id': str(user.id),
+            'type': int(user.type),
+            'exp': time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
+        })
+        token = user_claim.to_jwt(self.jwt_secret)
+
         return json_response(result=token)
 
     @token_error_handler

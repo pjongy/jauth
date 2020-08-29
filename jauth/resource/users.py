@@ -8,7 +8,7 @@ from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import find_user_by_id, user_model_to_dict, find_user_by_account, \
     create_user, find_user_by_third_party_user_id, update_user
 from jauth.resource import convert_request, json_response
-from jauth.structure.token.temp import VerifyUserEmailClaim
+from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
 from jauth.model.user import UserType, User
@@ -47,6 +47,11 @@ class VerifyEmailRequest:
     temp_token: str
 
 
+class ResetPasswordRequest:
+    temp_token: str
+    new_password: str
+
+
 class UsersHttpResource:
     def __init__(self, router, storage, secret, external):
         self.router = router
@@ -66,6 +71,7 @@ class UsersHttpResource:
         self.router.add_route('GET', '/-/{user_id}', self.get_user)
         self.router.add_route('GET', '/-/self/:verify', self.verify_myself)
         self.router.add_route('PUT', '/email/self/password', self.update_email_user_password)
+        self.router.add_route('POST', '/email/self/password:reset', self.reset_email_user_password)
 
     @token_error_handler
     @request_error_handler
@@ -230,6 +236,32 @@ class UsersHttpResource:
             user.hashed_password.encode()
         ):
             return json_response(reason='Invalid password', status=403)
+
+        hashed_password = bcrypt.hashpw(
+            request_body.new_password.encode(),
+            bcrypt.gensalt()
+        ).decode()
+
+        affected_rows = await update_user(
+            user_id=user_info.id,
+            hashed_password=hashed_password,
+        )
+        return json_response(result=affected_rows > 0)
+
+    @token_error_handler
+    @request_error_handler
+    async def reset_email_user_password(self, request):
+        request_body: ResetPasswordRequest = convert_request(
+            ResetPasswordRequest, await request.json())
+        user_info: ResetPasswordClaim = ResetPasswordClaim.from_jwt(
+            request_body.temp_token, self.jwt_secret)
+
+        if user_info.type != UserType.EMAIL:
+            return json_response(
+                reason=f'only email user can reset password', status=400)
+
+        if not is_valid_password(request_body.new_password):
+            return json_response(reason='password policy is not satisfied', status=400)
 
         hashed_password = bcrypt.hashpw(
             request_body.new_password.encode(),
