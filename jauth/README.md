@@ -148,6 +148,26 @@ class UserStatus(enum.IntEnum):
         }
         ```
 
+  - /email/self/password:reset *POST*
+    - purpose: Reset email user password
+    - query_string: `Empty`
+    - request:
+        ```
+        {
+            "temp_token": ...temp generated JWT token for reset password ...[str],
+            "new_password" ...new password that user wants ...[str]
+        }
+        ```
+    - request-header: `Empty`
+    - response:
+        ```
+        {
+          "success": ...,
+          "result": ...[bool],
+          "reason": ...,
+        }
+        ```
+
 ### Token management
 
 - /token
@@ -317,6 +337,29 @@ class UserStatus(enum.IntEnum):
                 }
             ]
           },
+          "reason": ...,
+        }
+        ```
+
+  - /token/password_reset *POST*
+    - purpose: Create temp token for `/user/email/self/password:reset`
+    - request:
+        ```
+        {
+          "user_id": ...[str],
+        }
+        ```
+    - request-header:
+        ```
+        {
+          "X-Server-Key": ... internal access key (setup by config when jauth start up) ...[str]
+        }
+        ```
+    - response:
+        ```
+        {
+          "success": ...,
+          "result": ...token for reset email user password ...[str],
           "reason": ...,
         }
         ```
