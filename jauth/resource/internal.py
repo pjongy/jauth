@@ -58,7 +58,7 @@ class InternalHttpResource:
     def route(self):
         self.router.add_route('POST', '/users:search', self.search_users)
         self.router.add_route('POST', '/token/email_verify', self.generate_email_verifying_token)
-        self.router.add_route('POST', '/users/password:reset', self.generate_password_reset_token)
+        self.router.add_route('POST', '/token/password_reset', self.generate_password_reset_token)
 
     def _check_server_key(self, request: Request):
         x_server_key = request.headers.get('X-Server-Key')
