@@ -107,13 +107,15 @@ class UserStatus(enum.IntEnum):
         }
         ```
 
-  - /-/self/:verify *GET*
+  - /-/self:verify *POST*
     - purpose: Verify user with email (Set is_email_verified as True)
-    - query_string:
+    - query_string: `Empty`
+    - request:
         ```
-        temp_token: ...temp generated JWT token for verify user
+        {
+            "temp_token": ...temp generated JWT token for verify user
+        }
         ```
-    - request: `Empty`
     - request-header: `Empty`
     - response:
         ```

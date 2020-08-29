@@ -69,7 +69,7 @@ class UsersHttpResource:
         self.router.add_route('GET', '/-/self', self.get_myself)
         self.router.add_route('PUT', '/-/self', self.update_myself)
         self.router.add_route('GET', '/-/{user_id}', self.get_user)
-        self.router.add_route('GET', '/-/self/:verify', self.verify_myself)
+        self.router.add_route('POST', '/-/self:verify', self.verify_myself)
         self.router.add_route('PUT', '/email/self/password', self.update_email_user_password)
         self.router.add_route('POST', '/email/self/password:reset', self.reset_email_user_password)
 
@@ -196,10 +196,10 @@ class UsersHttpResource:
     @token_error_handler
     @request_error_handler
     async def verify_myself(self, request):
-        request_param: VerifyEmailRequest = convert_request(
-            VerifyEmailRequest, dict(request.rel_url.query))
+        request_body: VerifyEmailRequest = convert_request(
+            VerifyEmailRequest, await request.json())
         user_info: VerifyUserEmailClaim = VerifyUserEmailClaim.from_jwt(
-            request_param.temp_token, self.jwt_secret)
+            request_body.temp_token, self.jwt_secret)
         user: User = await find_user_by_id(user_info.id)
 
         if not user:
