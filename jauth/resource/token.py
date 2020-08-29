@@ -81,8 +81,8 @@ class TokenHttpResource:
         await self.set_refresh_token(user_id=str(user.id), refresh_token=refresh_token)
         return refresh_token
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def get(self, request):
         user_info: UserClaim = get_bearer_token(self.jwt_secret, request)
         return json_response(result=object_to_dict(user_info))
@@ -138,8 +138,8 @@ class TokenHttpResource:
             'refresh_token': refresh_token,
         })
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def put(self, request):
         request_body: RefreshTokenRequest = convert_request(
             RefreshTokenRequest, await request.json())

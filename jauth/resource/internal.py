@@ -65,7 +65,6 @@ class InternalHttpResource:
         if x_server_key not in self.internal_api_keys:
             raise ServerKeyError()
 
-    @token_error_handler
     @request_error_handler
     @restrict_external_request_handler
     async def generate_email_verifying_token(self, request):
@@ -87,7 +86,6 @@ class InternalHttpResource:
 
         return json_response(result=token)
 
-    @token_error_handler
     @request_error_handler
     @restrict_external_request_handler
     async def generate_password_reset_token(self, request):
@@ -113,7 +111,6 @@ class InternalHttpResource:
 
         return json_response(result=token)
 
-    @token_error_handler
     @request_error_handler
     @restrict_external_request_handler
     async def search_users(self, request):

@@ -73,8 +73,8 @@ class UsersHttpResource:
         self.router.add_route('PUT', '/email/self/password', self.update_email_user_password)
         self.router.add_route('POST', '/email/self/password:reset', self.reset_email_user_password)
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def get_myself(self, request):
         user_info: UserClaim = get_bearer_token(self.jwt_secret, request)
         user = await find_user_by_id(user_info.id)
@@ -164,8 +164,8 @@ class UsersHttpResource:
         )
         return json_response(result=user_model_to_dict(user))
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def update_myself(self, request):
         user_info: UserClaim = get_bearer_token(self.jwt_secret, request)
         request_body: UpdateUserRequest = convert_request(
@@ -193,8 +193,8 @@ class UsersHttpResource:
         )
         return json_response(result=affected_rows > 0)
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def verify_myself(self, request):
         request_body: VerifyEmailRequest = convert_request(
             VerifyEmailRequest, await request.json())
@@ -211,8 +211,8 @@ class UsersHttpResource:
         )
         return json_response(result=True)
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def update_email_user_password(self, request):
         user_info: UserClaim = get_bearer_token(self.jwt_secret, request)
         request_body: UpdateUserPasswordRequest = convert_request(
@@ -248,8 +248,8 @@ class UsersHttpResource:
         )
         return json_response(result=affected_rows > 0)
 
-    @token_error_handler
     @request_error_handler
+    @token_error_handler
     async def reset_email_user_password(self, request):
         request_body: ResetPasswordRequest = convert_request(
             ResetPasswordRequest, await request.json())
