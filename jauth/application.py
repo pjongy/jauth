@@ -8,6 +8,7 @@ from aioredis import ConnectionsPool
 
 from jauth.config import config
 from jauth.external.callback.user_create import UserCreationCallbackHandler
+from jauth.external.callback.user_update import UserUpdateCallbackHandler
 from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
@@ -71,10 +72,12 @@ async def application():
         'internal_api_keys': config.api_server.internal_api_keys,
     }
     user_creation_callback_handler = UserCreationCallbackHandler(config.api_server.event_callback_urls)
+    user_update_callback_handler = UserUpdateCallbackHandler(config.api_server.event_callback_urls)
 
     resource_list: Dict[str, BaseResource] = {
         '/users': UsersHttpResource(
             user_creation_callback_handler=user_creation_callback_handler,
+            user_update_callback_handler=user_update_callback_handler,
             user_repository=user_repository,
             secret=secret,
             external=external,

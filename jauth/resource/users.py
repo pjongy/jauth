@@ -6,6 +6,7 @@ from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.callback.user_create import UserCreationCallbackHandler
+from jauth.external.callback.user_update import UserUpdateCallbackHandler
 from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import user_model_to_dict
 from jauth.repository.user_base import UserRepository
@@ -59,11 +60,13 @@ class UsersHttpResource(BaseResource):
     def __init__(
         self,
         user_creation_callback_handler: UserCreationCallbackHandler,
+        user_update_callback_handler: UserUpdateCallbackHandler,
         user_repository: UserRepository,
         secret: dict,
         external: dict,
     ):
         self.user_creation_callback_handler = user_creation_callback_handler
+        self.user_update_callback_handler = user_update_callback_handler
         self.user_repository = user_repository
         self.jwt_secret = secret['jwt_secret']
         self.third_party_user_method = {
@@ -128,6 +131,23 @@ class UsersHttpResource(BaseResource):
             'is_email_verified': user.is_email_verified,
             'extra': user.extra,
         })
+
+    async def _send_user_update_event(self, original: User, delta: dict):
+        user_status_to_str_map = {
+            UserStatus.NORMAL: 'NORMAL',
+            UserStatus.DELETED: 'DELETED',
+            UserStatus.WITHDRAWN: 'WITHDRAWN',
+        }
+
+        await self.user_update_callback_handler.handle(
+            {
+                'id': original.id,
+                'email': original.email,
+                'status': user_status_to_str_map[original.status],
+                'is_email_verified': original.is_email_verified,
+                'extra': original.extra,
+            } | delta
+        )
 
     @request_error_handler
     async def create_third_party_user(self, request):
@@ -228,6 +248,12 @@ class UsersHttpResource(BaseResource):
             extra=request_body.extra,
             **verified_status,
         )
+
+        await self._send_user_update_event(original=user, delta={
+            'email': request_body.email,
+            'extra': request_body.extra,
+            'is_email_verified': False,
+        })
         return json_response(result=affected_rows > 0)
 
     @request_error_handler
@@ -246,6 +272,9 @@ class UsersHttpResource(BaseResource):
             user_id=user_info.id,
             is_email_verified=True,
         )
+        await self._send_user_update_event(original=user, delta={
+            'is_email_verified': True,
+        })
         return json_response(result=True)
 
     @request_error_handler

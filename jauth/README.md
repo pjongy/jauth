@@ -31,6 +31,18 @@ The base event structure is:
 }
 ```
 
+- User Update (includes BaseMessage structure)
+```
+{
+  ...BaseMessage,
+  "user__id": (str) created user's id,
+  "user__email": (str) created user's email (if email user),
+  "user__status": (str) created user's status,
+  "user__is_email_verified": (bool) created user's email verify status,
+  "user__extra": (dict) created user's extra data
+}
+```
+
 ## Endpoint
 ### User management
 
