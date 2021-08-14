@@ -32,8 +32,6 @@ services:
     build:
       context: .
       dockerfile: jauth/Dockerfile
-      args:
-        - WORKER_COUNT=1
     ports:
       - 80:8080
     environment:
@@ -46,6 +44,7 @@ services:
       API_SERVER__REDIS__PASSWORD: redis_password
       API_SERVER__INTERNAL_API_KEYS: internal_key_1,internal_key_2
       API_SERVER__EVENT_CALLBACK_URLS: http://host/callback|TOKEN
+      WORKER_COUNT: 1
     networks:
       local_net:
         ipv4_address: 172.13.1.4
