@@ -4,6 +4,7 @@ import uuid
 
 import bcrypt
 import deserialize
+from aiohttp.web_urldispatcher import UrlDispatcher
 from aioredis import ConnectionsPool
 
 from jauth.decorator.request import request_error_handler
@@ -13,6 +14,7 @@ from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import find_user_by_third_party_user_id, find_user_by_id, \
     find_user_by_account
 from jauth.resource import json_response, convert_request
+from jauth.resource.base import BaseResource
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
 from jauth.model.user import UserType, User
@@ -36,11 +38,11 @@ class RefreshTokenRequest:
     refresh_token: str
 
 
-class TokenHttpResource:
+class TokenHttpResource(BaseResource):
     ACCESS_TOKEN_EXPIRE_TIME = 60 * 60  # 1 hour
     REFRESH_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60  # 30 days
 
-    def __init__(self, router, storage, secret, external):
+    def __init__(self, storage, secret, external):
         self.third_party_user_method = {
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
             UserType.KAKAO: external['third_party']['kakao'].get_user,
@@ -49,13 +51,12 @@ class TokenHttpResource:
         }
         self.jwt_secret = secret['jwt_secret']
         self.redis_auth: ConnectionsPool = storage['redis']['token_cache']
-        self.router = router
 
-    def route(self):
-        self.router.add_route('PUT', '', self.put)
-        self.router.add_route('POST', '/third_party', self.create_third_party_user_token)
-        self.router.add_route('POST', '/email', self.create_email_user_token)
-        self.router.add_route('GET', '/self', self.get)
+    def route(self, router: UrlDispatcher):
+        router.add_route('PUT', '', self.put)
+        router.add_route('POST', '/third_party', self.create_third_party_user_token)
+        router.add_route('POST', '/email', self.create_email_user_token)
+        router.add_route('GET', '/self', self.get)
 
     async def set_refresh_token(self, refresh_token: str, user_id: str):
         with await self.redis_auth as conn:

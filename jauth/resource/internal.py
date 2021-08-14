@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import deserialize
 from aiohttp.web_request import Request
+from aiohttp.web_urldispatcher import UrlDispatcher
 
 from jauth.decorator.internal import restrict_external_request_handler
 from jauth.decorator.request import request_error_handler
@@ -10,6 +11,7 @@ from jauth.decorator.token import token_error_handler
 from jauth.exception.permission import ServerKeyError
 from jauth.repository.user import find_user_by_id, search_users, user_model_to_dict
 from jauth.resource import json_response, convert_request
+from jauth.resource.base import BaseResource
 from jauth.structure.datetime_range import DatetimeRange
 from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
 from jauth.util.logger.logger import get_logger
@@ -47,18 +49,17 @@ class SearchUserRequest:
     types: List[int]
 
 
-class InternalHttpResource:
+class InternalHttpResource(BaseResource):
     ACCESS_TOKEN_EXPIRE_TIME = 60 * 60  # 1 hour
 
-    def __init__(self, router, storage, secret, external):
+    def __init__(self, secret):
         self.jwt_secret = secret['jwt_secret']
         self.internal_api_keys: List[str] = secret['internal_api_keys']
-        self.router = router
 
-    def route(self):
-        self.router.add_route('POST', '/users:search', self.search_users)
-        self.router.add_route('POST', '/token/email_verify', self.generate_email_verifying_token)
-        self.router.add_route('POST', '/token/password_reset', self.generate_password_reset_token)
+    def route(self, router: UrlDispatcher):
+        router.add_route('POST', '/users:search', self.search_users)
+        router.add_route('POST', '/token/email_verify', self.generate_email_verifying_token)
+        router.add_route('POST', '/token/password_reset', self.generate_password_reset_token)
 
     def _check_server_key(self, request: Request):
         x_server_key = request.headers.get('X-Server-Key')

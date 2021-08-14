@@ -1,5 +1,6 @@
 import bcrypt
 import deserialize
+from aiohttp.web_urldispatcher import UrlDispatcher
 
 from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
@@ -8,6 +9,7 @@ from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import find_user_by_id, user_model_to_dict, find_user_by_account, \
     create_user, find_user_by_third_party_user_id, update_user
 from jauth.resource import convert_request, json_response
+from jauth.resource.base import BaseResource
 from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
@@ -52,9 +54,8 @@ class ResetPasswordRequest:
     new_password: str
 
 
-class UsersHttpResource:
-    def __init__(self, router, storage, secret, external):
-        self.router = router
+class UsersHttpResource(BaseResource):
+    def __init__(self, secret, external):
         self.jwt_secret = secret['jwt_secret']
         self.third_party_user_method = {
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
@@ -63,15 +64,15 @@ class UsersHttpResource:
             UserType.GOOGLE: external['third_party']['google'].get_user,
         }
 
-    def route(self):
-        self.router.add_route('POST', '/email', self.create_email_user)
-        self.router.add_route('POST', '/third_party', self.create_third_party_user)
-        self.router.add_route('GET', '/-/self', self.get_myself)
-        self.router.add_route('PUT', '/-/self', self.update_myself)
-        self.router.add_route('GET', '/-/{user_id}', self.get_user)
-        self.router.add_route('POST', '/-/self:verify', self.verify_myself)
-        self.router.add_route('PUT', '/email/self/password', self.update_email_user_password)
-        self.router.add_route('POST', '/email/self/password:reset', self.reset_email_user_password)
+    def route(self, router: UrlDispatcher):
+        router.add_route('POST', '/email', self.create_email_user)
+        router.add_route('POST', '/third_party', self.create_third_party_user)
+        router.add_route('GET', '/-/self', self.get_myself)
+        router.add_route('PUT', '/-/self', self.update_myself)
+        router.add_route('GET', '/-/{user_id}', self.get_user)
+        router.add_route('POST', '/-/self:verify', self.verify_myself)
+        router.add_route('PUT', '/email/self/password', self.update_email_user_password)
+        router.add_route('POST', '/email/self/password:reset', self.reset_email_user_password)
 
     @request_error_handler
     @token_error_handler

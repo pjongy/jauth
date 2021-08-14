@@ -1,3 +1,5 @@
+from typing import Dict
+
 import aiohttp_cors
 
 import aioredis
@@ -64,20 +66,24 @@ async def application():
         'jwt_secret': config.api_server.jwt_secret,
         'internal_api_keys': config.api_server.internal_api_keys,
     }
-    resource_list = {
-        '/users': UsersHttpResource,
-        '/token': TokenHttpResource,
-        '/internal': InternalHttpResource,
+    resource_list: Dict[str, BaseResource] = {
+        '/users': UsersHttpResource(
+            secret=secret,
+            external=external,
+        ),
+        '/token': TokenHttpResource(
+            storage=storage,
+            secret=secret,
+            external=external,
+        ),
+        '/internal': InternalHttpResource(
+            secret=secret,
+        ),
     }
 
     for path, resource in resource_list.items():
         subapp = web.Application(logger=logger)
-        resource(
-            router=subapp.router,
-            storage=storage,
-            secret=secret,
-            external=external,
-        ).route()
+        resource.route(subapp.router)
         plugin_app(app, path, subapp)
 
     cors = aiohttp_cors.setup(app)
