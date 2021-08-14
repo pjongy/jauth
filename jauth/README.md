@@ -3,6 +3,34 @@
 ## Pre-requisites
 - python >= 3.7
 
+## Callback to external
+jauth supports callback request to external url with token for notify some events occurred by jauth to another service.
+
+The base event structure is:
+- BaseMessage
+```
+{
+  "issuer": (str)"jauth",
+  "issued_at": (int)unix timestamp,
+  "token": (str)token for verify that really jauth requested,
+  "type": (str)message type
+}
+```
+
+- User Creation (includes BaseMessage structure)
+```
+{
+  ...BaseMessage,
+  "user__id": (str) created user's id,
+  "user__email": (str) created user's email (if email user),
+  "user__third_party_user_id": (str) created user's third party id (if thirdparty user),
+  "user__type": (str) created user's type,
+  "user__status": (str) created user's status,
+  "user__is_email_verified": (bool) created user's email verify status,
+  "user__extra": (dict) created user's extra data
+}
+```
+
 ## Endpoint
 ### User management
 

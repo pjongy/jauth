@@ -61,6 +61,7 @@ $ docker run \
  -e API_SERVER__REDIS__HOST={..redis host..} \
  -e API_SERVER__REDIS__PASSWORD={..redis password..} \
  -e API_SERVER__INTERNAL_API_KEYS={..comma separated internal access keys..} \
+ -e API_SERVER__EVENT_CALLBACK_URLS={..comma separated string bar separated url sets..} \
  -e WORKER_COUNT=1 \
  -p 80:8080\
  pjongy/jauth

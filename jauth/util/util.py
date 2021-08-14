@@ -63,12 +63,12 @@ def datetime_to_kst_datetime(datetime_):
             return datetime_.astimezone(KST)
 
 
-def utc_now():
+def utc_now() -> datetime.datetime:
     current_time = datetime.datetime.now(UTC)
     return current_time
 
 
-def kst_now():
+def kst_now() -> datetime.datetime:
     current_time = datetime.datetime.now(KST)
     return current_time
 

@@ -5,6 +5,7 @@ from aiohttp.web_urldispatcher import UrlDispatcher
 from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
+from jauth.external.callback.user_create import UserCreationCallbackHandler
 from jauth.external.token import ThirdPartyUser
 from jauth.repository.user import user_model_to_dict
 from jauth.repository.user_base import UserRepository
@@ -13,7 +14,7 @@ from jauth.resource.base import BaseResource
 from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
-from jauth.model.user import UserType, User
+from jauth.model.user import UserType, User, UserStatus
 from jauth.util.util import is_valid_email, is_valid_password, is_valid_account
 
 logger = get_logger(__name__)
@@ -55,7 +56,14 @@ class ResetPasswordRequest:
 
 
 class UsersHttpResource(BaseResource):
-    def __init__(self, user_repository: UserRepository, secret: dict, external: dict):
+    def __init__(
+        self,
+        user_creation_callback_handler: UserCreationCallbackHandler,
+        user_repository: UserRepository,
+        secret: dict,
+        external: dict,
+    ):
+        self.user_creation_callback_handler = user_creation_callback_handler
         self.user_repository = user_repository
         self.jwt_secret = secret['jwt_secret']
         self.third_party_user_method = {
@@ -96,6 +104,31 @@ class UsersHttpResource(BaseResource):
 
         return json_response(result=user_model_to_dict(user))
 
+    async def _send_user_creation_event(self, user: User):
+        user_type_to_str_map = {
+            UserType.EMAIL: 'EMAIL',
+            UserType.KAKAO: 'KAKAO',
+            UserType.FACEBOOK: 'FACEBOOK',
+            UserType.GOOGLE: 'GOOGLE',
+            UserType.APPLE: 'APPLE',
+        }
+
+        user_status_to_str_map = {
+            UserStatus.NORMAL: 'NORMAL',
+            UserStatus.DELETED: 'DELETED',
+            UserStatus.WITHDRAWN: 'WITHDRAWN',
+        }
+
+        await self.user_creation_callback_handler.handle({
+            'id': user.id,
+            'email': user.email,
+            'third_party_user_id': user.third_party_user_id,
+            'type': user_type_to_str_map[user.type],
+            'status': user_status_to_str_map[user.status],
+            'is_email_verified': user.is_email_verified,
+            'extra': user.extra,
+        })
+
     @request_error_handler
     async def create_third_party_user(self, request):
         request_body: CreateThirdPartyUserRequest = convert_request(
@@ -128,6 +161,7 @@ class UsersHttpResource(BaseResource):
             third_party_user_id=third_party_user.id,
             extra=request_body.extra,
         )
+        await self._send_user_creation_event(user)
         return json_response(result=user_model_to_dict(user))
 
     @request_error_handler
@@ -164,6 +198,7 @@ class UsersHttpResource(BaseResource):
             email=request_body.email,
             extra=request_body.extra,
         )
+        await self._send_user_creation_event(user)
         return json_response(result=user_model_to_dict(user))
 
     @request_error_handler
