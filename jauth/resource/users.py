@@ -6,8 +6,8 @@ from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.token import ThirdPartyUser
-from jauth.repository.user import find_user_by_id, user_model_to_dict, find_user_by_account, \
-    create_user, find_user_by_third_party_user_id, update_user
+from jauth.repository.user import user_model_to_dict
+from jauth.repository.user_base import UserRepository
 from jauth.resource import convert_request, json_response
 from jauth.resource.base import BaseResource
 from jauth.structure.token.temp import VerifyUserEmailClaim, ResetPasswordClaim
@@ -55,7 +55,8 @@ class ResetPasswordRequest:
 
 
 class UsersHttpResource(BaseResource):
-    def __init__(self, secret, external):
+    def __init__(self, user_repository: UserRepository, secret: dict, external: dict):
+        self.user_repository = user_repository
         self.jwt_secret = secret['jwt_secret']
         self.third_party_user_method = {
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
@@ -78,7 +79,7 @@ class UsersHttpResource(BaseResource):
     @token_error_handler
     async def get_myself(self, request):
         user_info: UserClaim = get_bearer_token(self.jwt_secret, request)
-        user = await find_user_by_id(user_info.id)
+        user = await self.user_repository.find_user_by_id(user_info.id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -88,7 +89,7 @@ class UsersHttpResource(BaseResource):
     @request_error_handler
     async def get_user(self, request):
         user_id = request.match_info['user_id']
-        user = await find_user_by_id(user_id)
+        user = await self.user_repository.find_user_by_id(user_id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -112,7 +113,7 @@ class UsersHttpResource(BaseResource):
         except ThirdPartyTokenVerifyError:
             return json_response(reason='invalid third party token', status=400)
 
-        user: User = await find_user_by_third_party_user_id(
+        user: User = await self.user_repository.find_user_by_third_party_user_id(
             third_party_user_id=third_party_user.id,
             user_type=request_body.user_type,
         )
@@ -121,7 +122,7 @@ class UsersHttpResource(BaseResource):
             return json_response(
                 reason=f'account[{third_party_user.id}] already exists', status=409)
 
-        user = await create_user(
+        user = await self.user_repository.create_user(
             user_type=third_party_user.type,
             email=third_party_user.email,
             third_party_user_id=third_party_user.id,
@@ -136,7 +137,7 @@ class UsersHttpResource(BaseResource):
             await request.json()
         )
 
-        user = await find_user_by_account(request_body.account)
+        user = await self.user_repository.find_user_by_account(request_body.account)
         if user:
             return json_response(
                 reason=f'account[{request_body.account}] already exists', status=409)
@@ -156,7 +157,7 @@ class UsersHttpResource(BaseResource):
             request_body.password.encode(),
             bcrypt.gensalt()
         ).decode()
-        user = await create_user(
+        user = await self.user_repository.create_user(
             user_type=UserType.EMAIL,
             account=request_body.account,
             hashed_password=hashed_password,
@@ -177,7 +178,7 @@ class UsersHttpResource(BaseResource):
             return json_response(
                 reason=f'{request_body.email} is invalid email format', status=400)
 
-        user: User = await find_user_by_id(user_info.id)
+        user: User = await self.user_repository.find_user_by_id(user_info.id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -186,7 +187,7 @@ class UsersHttpResource(BaseResource):
         if user.email != request_body.email:
             verified_status['is_email_verified'] = False
 
-        affected_rows = await update_user(
+        affected_rows = await self.user_repository.update_user(
             user_id=user_info.id,
             email=request_body.email,
             extra=request_body.extra,
@@ -201,12 +202,12 @@ class UsersHttpResource(BaseResource):
             VerifyEmailRequest, await request.json())
         user_info: VerifyUserEmailClaim = VerifyUserEmailClaim.from_jwt(
             request_body.temp_token, self.jwt_secret)
-        user: User = await find_user_by_id(user_info.id)
+        user: User = await self.user_repository.find_user_by_id(user_info.id)
 
         if not user:
             return json_response(reason=f'user not found', status=404)
 
-        await update_user(
+        await self.user_repository.update_user(
             user_id=user_info.id,
             is_email_verified=True,
         )
@@ -220,7 +221,7 @@ class UsersHttpResource(BaseResource):
             UpdateUserPasswordRequest,
             await request.json()
         )
-        user: User = await find_user_by_id(user_info.id)
+        user: User = await self.user_repository.find_user_by_id(user_info.id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -243,7 +244,7 @@ class UsersHttpResource(BaseResource):
             bcrypt.gensalt()
         ).decode()
 
-        affected_rows = await update_user(
+        affected_rows = await self.user_repository.update_user(
             user_id=user_info.id,
             hashed_password=hashed_password,
         )
@@ -269,7 +270,7 @@ class UsersHttpResource(BaseResource):
             bcrypt.gensalt()
         ).decode()
 
-        affected_rows = await update_user(
+        affected_rows = await self.user_repository.update_user(
             user_id=user_info.id,
             hashed_password=hashed_password,
         )

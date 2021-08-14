@@ -7,9 +7,9 @@ from aiohttp.web_urldispatcher import UrlDispatcher
 
 from jauth.decorator.internal import restrict_external_request_handler
 from jauth.decorator.request import request_error_handler
-from jauth.decorator.token import token_error_handler
 from jauth.exception.permission import ServerKeyError
-from jauth.repository.user import find_user_by_id, search_users, user_model_to_dict
+from jauth.repository.user import user_model_to_dict
+from jauth.repository.user_base import UserRepository
 from jauth.resource import json_response, convert_request
 from jauth.resource.base import BaseResource
 from jauth.structure.datetime_range import DatetimeRange
@@ -52,7 +52,8 @@ class SearchUserRequest:
 class InternalHttpResource(BaseResource):
     ACCESS_TOKEN_EXPIRE_TIME = 60 * 60  # 1 hour
 
-    def __init__(self, secret):
+    def __init__(self, user_repository: UserRepository, secret: dict):
+        self.user_repository = user_repository
         self.jwt_secret = secret['jwt_secret']
         self.internal_api_keys: List[str] = secret['internal_api_keys']
 
@@ -73,7 +74,7 @@ class InternalHttpResource(BaseResource):
 
         request_body: CreateEmailVerifyingTokenRequest = convert_request(
             CreateEmailVerifyingTokenRequest, await request.json())
-        user: User = await find_user_by_id(request_body.user_id)
+        user: User = await self.user_repository.find_user_by_id(request_body.user_id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -94,7 +95,7 @@ class InternalHttpResource(BaseResource):
 
         request_body: CreatePasswordResetTokenRequest = convert_request(
             CreatePasswordResetTokenRequest, await request.json())
-        user: User = await find_user_by_id(request_body.user_id)
+        user: User = await self.user_repository.find_user_by_id(request_body.user_id)
         if not user:
             return json_response(
                 reason=f'user not found', status=404)
@@ -127,7 +128,7 @@ class InternalHttpResource(BaseResource):
         request_body: SearchUserRequest = convert_request(
             SearchUserRequest, await request.json())
 
-        total, users = await search_users(
+        total, users = await self.user_repository.search_users(
             emails=request_body.emails,
             created_at_range=request_body.created_at_range,
             modified_at_range=request_body.modified_at_range,

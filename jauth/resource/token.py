@@ -11,8 +11,7 @@ from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.token import ThirdPartyUser
-from jauth.repository.user import find_user_by_third_party_user_id, find_user_by_id, \
-    find_user_by_account
+from jauth.repository.user_base import UserRepository
 from jauth.resource import json_response, convert_request
 from jauth.resource.base import BaseResource
 from jauth.structure.token.user import UserClaim, get_bearer_token
@@ -42,7 +41,8 @@ class TokenHttpResource(BaseResource):
     ACCESS_TOKEN_EXPIRE_TIME = 60 * 60  # 1 hour
     REFRESH_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60  # 30 days
 
-    def __init__(self, storage, secret, external):
+    def __init__(self, user_repository: UserRepository, storage: dict, secret: dict, external: dict):
+        self.user_repository = user_repository
         self.third_party_user_method = {
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
             UserType.KAKAO: external['third_party']['kakao'].get_user,
@@ -92,7 +92,7 @@ class TokenHttpResource(BaseResource):
     async def create_email_user_token(self, request):
         request_body: CreateEmailUserTokenRequest = convert_request(
             CreateEmailUserTokenRequest, await request.json())
-        user: User = await find_user_by_account(request_body.account)
+        user: User = await self.user_repository.find_user_by_account(request_body.account)
 
         if user is None:
             return json_response(reason='user not found', status=404)
@@ -123,7 +123,7 @@ class TokenHttpResource(BaseResource):
         except ThirdPartyTokenVerifyError:
             return json_response(reason='invalid third party token', status=400)
 
-        user: User = await find_user_by_third_party_user_id(
+        user: User = await self.user_repository.find_user_by_third_party_user_id(
             third_party_user_id=third_party_user.id,
             user_type=request_body.user_type,
         )
@@ -149,7 +149,7 @@ class TokenHttpResource(BaseResource):
         if user_id is None:
             return json_response(reason='token not found', status=404)
 
-        user = await find_user_by_id(to_string(user_id))
+        user = await self.user_repository.find_user_by_id(to_string(user_id))
         if not user:
             return json_response(
                 reason=f'user not found', status=404)

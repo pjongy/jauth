@@ -11,11 +11,12 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
+from jauth.repository.user import UserRepositoryImpl
+from jauth.resource.base import BaseResource
 from jauth.resource.internal import InternalHttpResource
 from jauth.resource.token import TokenHttpResource
 from jauth.resource.users import UsersHttpResource
 from jauth.util.logger.logger import get_logger
-from jauth.util.storage.init import init_db
 from jauth.util.util import object_to_dict
 
 
@@ -31,13 +32,15 @@ async def application():
     app = web.Application(logger=logger)
     logger.debug(object_to_dict(config))
     mysql_config = config.api_server.mysql
-    await init_db(
+
+    user_repository = UserRepositoryImpl(
         host=mysql_config.host,
         port=mysql_config.port,
         user=mysql_config.user,
         password=mysql_config.password,
-        db=mysql_config.database,
+        db=mysql_config.database
     )
+    await user_repository.generate_scheme()
 
     redis_config = config.api_server.redis
 
@@ -68,15 +71,18 @@ async def application():
     }
     resource_list: Dict[str, BaseResource] = {
         '/users': UsersHttpResource(
+            user_repository=user_repository,
             secret=secret,
             external=external,
         ),
         '/token': TokenHttpResource(
+            user_repository=user_repository,
             storage=storage,
             secret=secret,
             external=external,
         ),
         '/internal': InternalHttpResource(
+            user_repository=user_repository,
             secret=secret,
         ),
     }
