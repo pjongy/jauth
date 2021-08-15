@@ -2,9 +2,7 @@ from typing import Dict
 
 import aiohttp_cors
 
-import aioredis
 from aiohttp import web
-from aioredis import ConnectionsPool
 
 from jauth.config import config
 from jauth.external.callback.user_create import UserCreationCallbackHandler
@@ -46,22 +44,6 @@ async def application():
     )
     user_repository = UserRepositoryImpl()
     token_repository = TokenRepositoryImpl()
-
-    redis_config = config.api_server.redis
-
-    token_cache: ConnectionsPool = await aioredis.create_pool(
-        f'redis://{redis_config.host}:{redis_config.port}',
-        password=redis_config.password,
-        minsize=5,
-        maxsize=10,
-        db=redis_config.token_cache.database,
-    )
-
-    storage = {
-        'redis': {
-            'token_cache': token_cache,
-        }
-    }
     external = {
         'third_party': {
             'facebook': FacebookToken(),
@@ -88,7 +70,6 @@ async def application():
         '/token': TokenHttpResource(
             user_repository=user_repository,
             token_repository=token_repository,
-            storage=storage,
             secret=secret,
             external=external,
         ),

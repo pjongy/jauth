@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List
 
 import deserialize
 
@@ -24,20 +24,7 @@ class Config:
             password: str
             database: str
 
-        @deserialize.default('port', 6379)
-        @deserialize.parser('port', int)
-        class Redis:
-            @deserialize.parser('database', int)
-            class Database:
-                database: int
-            host: str
-            port: int
-            password: str
-
-            token_cache: Database
-
         mysql: MySQL
-        redis: Redis
         jwt_secret: str
         port: int
 

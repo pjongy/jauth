@@ -3,11 +3,6 @@
     "mysql": {
       "database": "jauth"
     },
-    "redis": {
-      "token_cache": {
-        "database": 0
-      }
-    },
     "port": 8080
   }
 }

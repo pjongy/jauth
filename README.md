@@ -40,10 +40,6 @@ $ docker-compose -f local-docker-compose.yml up -d
     ```
     $ docker run -d -e  MYSQL_ROOT_PASSWORD={..mysql password..} -p 3306:3306 mysql
     ```
-- Run Redis server
-    ```
-    $ docker run -d -p 6379:6379 redis
-    ```
 
 ## Build
 ```
@@ -59,8 +55,6 @@ $ docker run \
  -e API_SERVER__MYSQL__USER={..mysql user..} \
  -e API_SERVER__MYSQL__DATABASE={..mysql database name..} \
  -e API_SERVER__MYSQL__PASSWORD={..mysql password..} \
- -e API_SERVER__REDIS__HOST={..redis host..} \
- -e API_SERVER__REDIS__PASSWORD={..redis password..} \
  -e API_SERVER__INTERNAL_API_KEYS={..comma separated internal access keys..} \
  -e API_SERVER__EVENT_CALLBACK_URLS={..comma separated string bar separated url sets..} \
  -e WORKER_COUNT=1 \

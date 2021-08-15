@@ -1,12 +1,9 @@
-import asyncio
 import time
-import uuid
 from typing import Optional
 
 import bcrypt
 import deserialize
 from aiohttp.web_urldispatcher import UrlDispatcher
-from aioredis import ConnectionsPool
 
 from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
@@ -47,7 +44,6 @@ class TokenHttpResource(BaseResource):
         self,
         user_repository: UserRepository,
         token_repository: TokenRepository,
-        storage: dict,
         secret: dict,
         external: dict,
     ):
@@ -60,7 +56,6 @@ class TokenHttpResource(BaseResource):
             UserType.GOOGLE: external['third_party']['google'].get_user,
         }
         self.jwt_secret = secret['jwt_secret']
-        self.redis_auth: ConnectionsPool = storage['redis']['token_cache']
 
     def route(self, router: UrlDispatcher):
         router.add_route('PUT', '', self.put)
