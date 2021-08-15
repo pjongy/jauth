@@ -24,8 +24,14 @@
 - docker >= 19.03.8
 - docker-compose >= 1.25.5
 
+### Start
 ```
 $ docker-compose -f local-docker-compose.yml up -d
+```
+
+### Test
+```
+$ docker-compose -f test-docker-compose.yml up -d
 ```
 
 ## Project structure
@@ -60,4 +66,9 @@ $ docker run \
  -e WORKER_COUNT=1 \
  -p 80:8080\
  pjongy/jauth
+```
+
+## Test
+```
+$ TEST_ENDPOINT=http://127.0.0.1 python -m endpoint_test.tester
 ```
