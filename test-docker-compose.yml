@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  mysql:
+    image: 'mysql:8.0.17'
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_password
+    volumes:
+      - ./mysql_init:/docker-entrypoint-initdb.d
+  jauth-tester:
+    build:
+      context: .
+      dockerfile: endpoint_test/Dockerfile
+    environment:
+      ENV: dev
+      API_SERVER__JWT_SECRET: jwt_secret
+      API_SERVER__MYSQL__HOST: mysql
+      API_SERVER__MYSQL__USER: root
+      API_SERVER__MYSQL__PASSWORD: mysql_password
+      API_SERVER__INTERNAL_API_KEYS: internal_key_1,internal_key_2
+      API_SERVER__EVENT_CALLBACK_URLS: http://host/callback|TOKEN
+      WORKER_COUNT: 1
+    restart: unless-stopped
+    depends_on:
+      - mysql
