@@ -2,11 +2,15 @@ import random
 import unittest
 
 from endpoint_test.tester import TEST_ENDPOINT
-from endpoint_test.tester.util.request import post
+from endpoint_test.tester.util.request import post, get
 from jauth.model.user import UserType
 
 
 class TestUser(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self) -> None:
+        status, body, _ = await get(f'{TEST_ENDPOINT}/storage/clean-up')
+        assert body['result']['status'] == 'done'
+
     async def test_email_user_signup_succeed(self):
         dummy_email = 'dummy@user.com'
         dummy_account = f'dummy{random.randint(0, 9999)}'

@@ -13,9 +13,11 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
-from jauth.model.user import UserType
+from jauth.model.token import Token
+from jauth.model.user import UserType, User
 from jauth.repository.token import TokenRepositoryImpl
 from jauth.repository.user import UserRepositoryImpl
+from jauth.resource import json_response
 from jauth.resource.base import BaseResource
 from jauth.resource.internal import InternalHttpResource
 from jauth.resource.token import TokenHttpResource
@@ -93,6 +95,13 @@ async def application():
             secret=secret,
         ),
     }
+
+    async def cleanup(request):
+        await User.all().delete()
+        await Token.all().delete()
+        return json_response(result={'status': 'done'})
+
+    app.router.add_get('/storage/clean-up', cleanup)
 
     for path, resource in resource_list.items():
         subapp = web.Application(logger=logger)
