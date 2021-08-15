@@ -13,6 +13,7 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
+from jauth.model.user import UserType
 from jauth.repository.token import TokenRepositoryImpl
 from jauth.repository.user import UserRepositoryImpl
 from jauth.resource.base import BaseResource
@@ -48,10 +49,10 @@ async def application():
     token_repository = TokenRepositoryImpl()
     external = {
         'third_party': {
-            'facebook': FacebookToken(),
-            'kakao': KakaoToken(),
-            'apple': AppleToken(),
-            'google': GoogleToken(),
+            'facebook': DummyThirdPartyRequest({'dummy-facebook-token': 'dummy-facebook-user-id'}, UserType.FACEBOOK),
+            'kakao': DummyThirdPartyRequest({'dummy-kakao-token': 'dummy-kakao-user-id'}, UserType.KAKAO),
+            'apple': DummyThirdPartyRequest({'dummy-apple-token': 'dummy-apple-user-id'}, UserType.APPLE),
+            'google': DummyThirdPartyRequest({'dummy-google-token': 'dummy-google-user-id'}, UserType.GOOGLE),
         },
     }
     secret = {
