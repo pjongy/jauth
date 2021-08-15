@@ -13,13 +13,13 @@ services:
       dockerfile: endpoint_test/Dockerfile
     environment:
       ENV: dev
+      TEST_ENDPOINT: http://jauth-tester:8080
       API_SERVER__JWT_SECRET: jwt_secret
       API_SERVER__MYSQL__HOST: mysql
       API_SERVER__MYSQL__USER: root
       API_SERVER__MYSQL__PASSWORD: mysql_password
       API_SERVER__INTERNAL_API_KEYS: internal_key_1,internal_key_2
-      API_SERVER__EVENT_CALLBACK_URLS: http://host/callback|TOKEN
+      API_SERVER__EVENT_CALLBACK_URLS: http://127.0.0.1:8080/callback|TOKEN
       WORKER_COUNT: 1
-    restart: unless-stopped
     depends_on:
       - mysql
