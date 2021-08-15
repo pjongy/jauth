@@ -13,6 +13,7 @@ from jauth.external.token.apple import AppleToken
 from jauth.external.token.facebook import FacebookToken
 from jauth.external.token.google import GoogleToken
 from jauth.external.token.kakao import KakaoToken
+from jauth.repository.token import TokenRepositoryImpl
 from jauth.repository.user import UserRepositoryImpl
 from jauth.resource.base import BaseResource
 from jauth.resource.internal import InternalHttpResource
@@ -44,6 +45,7 @@ async def application():
         db=mysql_config.database
     )
     user_repository = UserRepositoryImpl()
+    token_repository = TokenRepositoryImpl()
 
     redis_config = config.api_server.redis
 
@@ -85,6 +87,7 @@ async def application():
         ),
         '/token': TokenHttpResource(
             user_repository=user_repository,
+            token_repository=token_repository,
             storage=storage,
             secret=secret,
             external=external,

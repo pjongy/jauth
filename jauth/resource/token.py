@@ -1,6 +1,7 @@
 import asyncio
 import time
 import uuid
+from typing import Optional
 
 import bcrypt
 import deserialize
@@ -11,13 +12,14 @@ from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
 from jauth.external.token import ThirdPartyUser
+from jauth.repository.token_base import TokenRepository
 from jauth.repository.user_base import UserRepository
 from jauth.resource import json_response, convert_request
 from jauth.resource.base import BaseResource
 from jauth.structure.token.user import UserClaim, get_bearer_token
 from jauth.util.logger.logger import get_logger
 from jauth.model.user import UserType, User
-from jauth.util.util import object_to_dict, to_string
+from jauth.util.util import object_to_dict, to_string, utc_now
 
 logger = get_logger(__name__)
 
@@ -41,8 +43,16 @@ class TokenHttpResource(BaseResource):
     ACCESS_TOKEN_EXPIRE_TIME = 60 * 60  # 1 hour
     REFRESH_TOKEN_EXPIRE_TIME = 30 * 24 * 60 * 60  # 30 days
 
-    def __init__(self, user_repository: UserRepository, storage: dict, secret: dict, external: dict):
+    def __init__(
+        self,
+        user_repository: UserRepository,
+        token_repository: TokenRepository,
+        storage: dict,
+        secret: dict,
+        external: dict,
+    ):
         self.user_repository = user_repository
+        self.token_repository = token_repository
         self.third_party_user_method = {
             UserType.FACEBOOK: external['third_party']['facebook'].get_user,
             UserType.KAKAO: external['third_party']['kakao'].get_user,
@@ -58,16 +68,12 @@ class TokenHttpResource(BaseResource):
         router.add_route('POST', '/email', self.create_email_user_token)
         router.add_route('GET', '/self', self.get)
 
-    async def set_refresh_token(self, refresh_token: str, user_id: str):
-        with await self.redis_auth as conn:
-            await asyncio.gather(
-                conn.execute('set', refresh_token, user_id),
-                conn.execute('expire', refresh_token, self.REFRESH_TOKEN_EXPIRE_TIME)
-            )
-
-    async def get_user_id_by_refresh_token(self, refresh_token):
-        with await self.redis_auth as conn:
-            return await conn.execute('get', refresh_token)
+    async def _get_user_id_by_refresh_token(self, refresh_token) -> Optional[str]:
+        token = await self.token_repository.find_token_by_id(refresh_token)
+        if token.created_at.timestamp() + self.REFRESH_TOKEN_EXPIRE_TIME < utc_now().timestamp():
+            await self.token_repository.delete_token(refresh_token)
+            return None
+        return str(token.user_id)
 
     def _create_access_token(self, user: User) -> str:
         user_claim: UserClaim = deserialize.deserialize(UserClaim, {
@@ -78,9 +84,8 @@ class TokenHttpResource(BaseResource):
         return user_claim.to_jwt(self.jwt_secret)
 
     async def _create_refresh_token(self, user: User) -> str:
-        refresh_token = str(uuid.uuid4())
-        await self.set_refresh_token(user_id=str(user.id), refresh_token=refresh_token)
-        return refresh_token
+        token = await self.token_repository.create_token(user_id=str(user.id))
+        return str(token.id)
 
     @request_error_handler
     @token_error_handler
@@ -145,7 +150,7 @@ class TokenHttpResource(BaseResource):
         request_body: RefreshTokenRequest = convert_request(
             RefreshTokenRequest, await request.json())
 
-        user_id = await self.get_user_id_by_refresh_token(request_body.refresh_token)
+        user_id = await self._get_user_id_by_refresh_token(request_body.refresh_token)
         if user_id is None:
             return json_response(reason='token not found', status=404)
 

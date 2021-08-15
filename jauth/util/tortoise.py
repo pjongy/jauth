@@ -10,7 +10,8 @@ async def init_db(host, port, user, password, db, generate=True):
             'apps': {
                 'models': {
                     'models': [
-                        'jauth.model.user'
+                        'jauth.model.user',
+                        'jauth.model.token',
                     ],
                     # If no default_connection specified, defaults to 'default'
                     'default_connection': 'default',
