@@ -18,57 +18,54 @@
 ---
 [API-SPEC](./jauth/README.md)
 
+# Usage
+
 ## Quick start (on local)
 
-### Pre-requisites
-- docker >= 19.03.8
-- docker-compose >= 1.25.5
-
-### Start
 ```
 $ docker-compose -f local-docker-compose.yml up -d
 ```
 
-### Test
-```
-$ docker-compose -f test-docker-compose.yml up -d
-```
+## Manually start
 
-## Project structure
-```
-/
-  /jauth
-```
-
-
-## Pre-requisite
 - Run mysql server and create database
-    ```
-    $ docker run -d -e  MYSQL_ROOT_PASSWORD={..mysql password..} -p 3306:3306 mysql
-    ```
+  ```
+  $ docker run -d -e  MYSQL_ROOT_PASSWORD={..mysql password..} -p 3306:3306 mysql
+  ```
+- Run
+  ```
+  $ docker run \
+   -e ENV=dev \
+   -e API_SERVER__JWT_SECRET=jwt_secret \
+   -e API_SERVER__MYSQL__HOST={..mysql host..} \
+   -e API_SERVER__MYSQL__USER={..mysql user..} \
+   -e API_SERVER__MYSQL__DATABASE={..mysql database name..} \
+   -e API_SERVER__MYSQL__PASSWORD={..mysql password..} \
+   -e API_SERVER__INTERNAL_API_KEYS={..comma separated internal access keys..} \
+   -e API_SERVER__EVENT_CALLBACK_URLS={..comma separated string bar separated url sets..} \
+   -e WORKER_COUNT=1 \
+   -p 80:8080\
+   pjongy/jauth
+  ```
+
+# Develop
 
 ## Build
+
 ```
 $ docker build . -f ./jauth/Dockerfile
 ```
 
-## Start
+## Test
+
 ```
-$ docker run \
- -e ENV=dev \
- -e API_SERVER__JWT_SECRET=jwt_secret \
- -e API_SERVER__MYSQL__HOST={..mysql host..} \
- -e API_SERVER__MYSQL__USER={..mysql user..} \
- -e API_SERVER__MYSQL__DATABASE={..mysql database name..} \
- -e API_SERVER__MYSQL__PASSWORD={..mysql password..} \
- -e API_SERVER__INTERNAL_API_KEYS={..comma separated internal access keys..} \
- -e API_SERVER__EVENT_CALLBACK_URLS={..comma separated string bar separated url sets..} \
- -e WORKER_COUNT=1 \
- -p 80:8080\
- pjongy/jauth
+$ docker-compose -f test-docker-compose.yml up -d --build jauth-tester
 ```
 
-## Test
+## Project structure
+
 ```
-$ TEST_ENDPOINT=http://127.0.0.1 python -m endpoint_test.tester
+/
+  /jauth  # API server implementation path
+  /endpoint_test  # Dependency manipulated API server for testing and API endpoint level tester
 ```

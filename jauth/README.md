@@ -22,7 +22,7 @@ The base event structure is:
 {
   ...BaseMessage,
   "user__id": (str) created user's id,
-  "user__email": (str) created user's email (if email user),
+  "user__email": (str) created user's email,
   "user__third_party_user_id": (str) created user's third party id (if thirdparty user),
   "user__type": (str) created user's type,
   "user__status": (str) created user's status,
