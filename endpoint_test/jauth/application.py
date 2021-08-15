@@ -4,6 +4,8 @@ import aiohttp_cors
 
 from aiohttp import web
 
+from endpoint_test.jauth.external.callback.dummy import DummyCallbackHandler
+from endpoint_test.jauth.external.token.dummy import DummyThirdPartyRequest
 from jauth.config import config
 from jauth.external.callback.user_create import UserCreationCallbackHandler
 from jauth.external.callback.user_update import UserUpdateCallbackHandler
@@ -56,8 +58,8 @@ async def application():
         'jwt_secret': config.api_server.jwt_secret,
         'internal_api_keys': config.api_server.internal_api_keys,
     }
-    user_creation_callback_handler = UserCreationCallbackHandler(config.api_server.event_callback_urls)
-    user_update_callback_handler = UserUpdateCallbackHandler(config.api_server.event_callback_urls)
+    user_creation_callback_handler = DummyCallbackHandler()
+    user_update_callback_handler = DummyCallbackHandler()
 
     resource_list: Dict[str, BaseResource] = {
         '/users': UsersHttpResource(

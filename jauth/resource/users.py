@@ -5,6 +5,7 @@ from aiohttp.web_urldispatcher import UrlDispatcher
 from jauth.decorator.request import request_error_handler
 from jauth.decorator.token import token_error_handler
 from jauth.exception.third_party import ThirdPartyTokenVerifyError
+from jauth.external.callback.base import BaseCallbackHandler
 from jauth.external.callback.user_create import UserCreationCallbackHandler
 from jauth.external.callback.user_update import UserUpdateCallbackHandler
 from jauth.external.token import ThirdPartyUser
@@ -59,8 +60,8 @@ class ResetPasswordRequest:
 class UsersHttpResource(BaseResource):
     def __init__(
         self,
-        user_creation_callback_handler: UserCreationCallbackHandler,
-        user_update_callback_handler: UserUpdateCallbackHandler,
+        user_creation_callback_handler: BaseCallbackHandler,
+        user_update_callback_handler: BaseCallbackHandler,
         user_repository: UserRepository,
         secret: dict,
         external: dict,
