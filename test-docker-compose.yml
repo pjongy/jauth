@@ -13,13 +13,15 @@ services:
       dockerfile: endpoint_test/Dockerfile
     environment:
       ENV: dev
-      TEST_ENDPOINT: http://jauth-tester:8080
+      TESTER__ENDPOINT: http://jauth-tester:8080
+      # One on API_SERVER__INTERNAL_API_KEYS
+      TESTER__INTERNAL_API_KEY: internal_key_1
       API_SERVER__JWT_SECRET: jwt_secret
       API_SERVER__MYSQL__HOST: mysql
       API_SERVER__MYSQL__USER: root
       API_SERVER__MYSQL__PASSWORD: mysql_password
       API_SERVER__INTERNAL_API_KEYS: internal_key_1,internal_key_2
-      # Callback would not be work because of DummyCallbackHandler
+      # Callback might not work because of DummyCallbackHandler
       API_SERVER__EVENT_CALLBACK_URLS: http://non-existence-callback/callback|TOKEN
       WORKER_COUNT: 1
     depends_on:

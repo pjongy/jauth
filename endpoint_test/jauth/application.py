@@ -7,12 +7,6 @@ from aiohttp import web
 from endpoint_test.jauth.external.callback.dummy import DummyCallbackHandler
 from endpoint_test.jauth.external.token.dummy import DummyThirdPartyRequest
 from jauth.config import config
-from jauth.external.callback.user_create import UserCreationCallbackHandler
-from jauth.external.callback.user_update import UserUpdateCallbackHandler
-from jauth.external.token.apple import AppleToken
-from jauth.external.token.facebook import FacebookToken
-from jauth.external.token.google import GoogleToken
-from jauth.external.token.kakao import KakaoToken
 from jauth.model.token import Token
 from jauth.model.user import UserType, User
 from jauth.repository.token import TokenRepositoryImpl

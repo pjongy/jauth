@@ -1,14 +1,14 @@
 import random
 import unittest
 
-from endpoint_test.tester import TEST_ENDPOINT
+from endpoint_test.tester.config import config
 from endpoint_test.tester.util.request import post, get
 from jauth.model.user import UserType
 
 
 class TestUser(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self) -> None:
-        status, body, _ = await get(f"{TEST_ENDPOINT}/storage/clean-up")
+        status, body, _ = await get(f"{config.tester.endpoint}/storage/clean-up")
         assert body["result"]["status"] == "done"
 
     async def test_email_user_signup_succeed(self):
@@ -16,7 +16,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         dummy_account = f"dummy{random.randint(0, 9999)}"
         dummy_password = "dummy-password"
         status, body, _ = await post(
-            f"{TEST_ENDPOINT}/users/email",
+            f"{config.tester.endpoint}/users/email",
             parameters={
                 "email": dummy_email,
                 "account": dummy_account,
@@ -36,7 +36,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         dummy_account = f"dummy{random.randint(0, 9999)}"
         dummy_password = "dummy-password"
         status, body, _ = await post(
-            f"{TEST_ENDPOINT}/users/email",
+            f"{config.tester.endpoint}/users/email",
             parameters={
                 "email": dummy_email,
                 "account": dummy_account,
@@ -51,7 +51,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         assert user["type"] == UserType.EMAIL
 
         status, body, _ = await post(
-            f"{TEST_ENDPOINT}/users/email",
+            f"{config.tester.endpoint}/users/email",
             parameters={
                 "email": dummy_email,
                 "account": dummy_account,
@@ -71,7 +71,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         }
         for token, user_type in dummy_users.items():
             status, body, _ = await post(
-                f"{TEST_ENDPOINT}/users/third_party",
+                f"{config.tester.endpoint}/users/third_party",
                 parameters={
                     "third_party_token": token,
                     "user_type": user_type,
@@ -94,7 +94,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         }
         for token, user_type in dummy_users.items():
             status, body, _ = await post(
-                f"{TEST_ENDPOINT}/users/third_party",
+                f"{config.tester.endpoint}/users/third_party",
                 parameters={
                     "third_party_token": token,
                     "user_type": user_type,
@@ -116,7 +116,7 @@ class TestUser(unittest.IsolatedAsyncioTestCase):
         }
         for token, user_type in dummy_users.items():
             status, body, _ = await post(
-                f"{TEST_ENDPOINT}/users/third_party",
+                f"{config.tester.endpoint}/users/third_party",
                 parameters={
                     "third_party_token": token,
                     "user_type": user_type,
