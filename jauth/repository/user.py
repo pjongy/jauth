@@ -35,35 +35,6 @@ def _user_relational_query_set(query_set: QuerySet[User]) -> QuerySet[User]:
 
 
 class UserRepositoryImpl(UserRepository):
-    def __init__(self, host: str, port: int, user: str, password: str, db: str, generate=True):
-        self.host = host
-        self.port = port
-        self.user = user
-        self.password = password
-        self.db = db
-        self.generate = generate
-
-    async def generate_scheme(self):
-        await Tortoise.init(
-            {
-                'connections': {
-                    'default': f'mysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.db}'
-                },
-                'apps': {
-                    'models': {
-                        'models': [
-                            'jauth.model.user'
-                        ],
-                        # If no default_connection specified, defaults to 'default'
-                        'default_connection': 'default',
-                    }
-                }
-            }
-        )
-        if self.generate:
-            # Generate the schema
-            await Tortoise.generate_schemas(safe=True)
-
     async def find_user_by_id(self, _id: str) -> User:
         return await _user_relational_query_set(
             User.filter(

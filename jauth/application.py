@@ -19,6 +19,7 @@ from jauth.resource.internal import InternalHttpResource
 from jauth.resource.token import TokenHttpResource
 from jauth.resource.users import UsersHttpResource
 from jauth.util.logger.logger import get_logger
+from jauth.util.tortoise import init_db
 from jauth.util.util import object_to_dict
 
 
@@ -35,14 +36,14 @@ async def application():
     logger.debug(object_to_dict(config))
     mysql_config = config.api_server.mysql
 
-    user_repository = UserRepositoryImpl(
+    await init_db(
         host=mysql_config.host,
         port=mysql_config.port,
         user=mysql_config.user,
         password=mysql_config.password,
         db=mysql_config.database
     )
-    await user_repository.generate_scheme()
+    user_repository = UserRepositoryImpl()
 
     redis_config = config.api_server.redis
 
