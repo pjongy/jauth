@@ -8,6 +8,7 @@ CMD gunicorn endpoint_test.jauth.application:application \
     --bind 0.0.0.0:8080 \
     --worker-class aiohttp.GunicornWebWorker \
     --workers=$WORKER_COUNT \
-    --access-logfile - \
+    --access-logfile log.txt \
     --daemon \
-    && python3 -m endpoint_test.tester
+    && python3 -m endpoint_test.tester \
+    && cat log.txt
