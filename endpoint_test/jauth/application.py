@@ -49,10 +49,22 @@ async def application():
     token_repository = TokenRepositoryImpl()
     external = {
         'third_party': {
-            'facebook': DummyThirdPartyRequest({'dummy-facebook-token': 'dummy-facebook-user-id'}, UserType.FACEBOOK),
-            'kakao': DummyThirdPartyRequest({'dummy-kakao-token': 'dummy-kakao-user-id'}, UserType.KAKAO),
-            'apple': DummyThirdPartyRequest({'dummy-apple-token': 'dummy-apple-user-id'}, UserType.APPLE),
-            'google': DummyThirdPartyRequest({'dummy-google-token': 'dummy-google-user-id'}, UserType.GOOGLE),
+            'facebook': DummyThirdPartyRequest({
+                'dummy-facebook-token': 'dummy-facebook-user-id',
+                'dummy-facebook-token-dup': 'dummy-facebook-user-id',
+            }, UserType.FACEBOOK),
+            'kakao': DummyThirdPartyRequest({
+                'dummy-kakao-token': 'dummy-kakao-user-id',
+                'dummy-kakao-token-dup': 'dummy-kakao-user-id',
+            }, UserType.KAKAO),
+            'apple': DummyThirdPartyRequest({
+                'dummy-apple-token': 'dummy-apple-user-id',
+                'dummy-apple-token-dup': 'dummy-apple-user-id',
+            }, UserType.APPLE),
+            'google': DummyThirdPartyRequest({
+                'dummy-google-token': 'dummy-google-user-id',
+                'dummy-google-token-dup': 'dummy-google-user-id',
+            }, UserType.GOOGLE),
         },
     }
     secret = {
