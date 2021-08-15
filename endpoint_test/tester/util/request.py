@@ -1,3 +1,5 @@
+import urllib.parse
+
 import aiohttp
 
 DEFAULT_HEADERS = {'Accept': 'application/json', 'Content-Type': 'application/json'}
@@ -20,4 +22,16 @@ async def post(url='', parameters=None, headers=None, is_json=True):
         default_header = DEFAULT_HEADERS_FORM_DATA
     async with aiohttp.ClientSession(headers={**default_header, **headers}) as session:
         async with session.post(url, **post_params) as resp:
+            return resp.status, await resp.json(), resp.headers
+
+
+async def get(url='', parameters=None, headers=None):
+    if headers is None:
+        headers = DEFAULT_HEADERS
+    if parameters is None:
+        parameters = {}
+
+    req_url = f'{url}?{urllib.parse.urlencode(parameters)}'
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(req_url) as resp:
             return resp.status, await resp.json(), resp.headers
