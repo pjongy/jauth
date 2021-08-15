@@ -16,6 +16,7 @@
 
 
 ---
+[API-SPEC](./jauth/README.md)
 
 ## Quick start (on local)
 
