@@ -45,52 +45,64 @@ async def application():
         port=mysql_config.port,
         user=mysql_config.user,
         password=mysql_config.password,
-        db=mysql_config.database
+        db=mysql_config.database,
     )
     user_repository = UserRepositoryImpl()
     token_repository = TokenRepositoryImpl()
     external = {
-        'third_party': {
-            'facebook': DummyThirdPartyRequest({
-                'dummy-facebook-token': 'dummy-facebook-user-id',
-                'dummy-facebook-token-dup': 'dummy-facebook-user-id',
-            }, UserType.FACEBOOK),
-            'kakao': DummyThirdPartyRequest({
-                'dummy-kakao-token': 'dummy-kakao-user-id',
-                'dummy-kakao-token-dup': 'dummy-kakao-user-id',
-            }, UserType.KAKAO),
-            'apple': DummyThirdPartyRequest({
-                'dummy-apple-token': 'dummy-apple-user-id',
-                'dummy-apple-token-dup': 'dummy-apple-user-id',
-            }, UserType.APPLE),
-            'google': DummyThirdPartyRequest({
-                'dummy-google-token': 'dummy-google-user-id',
-                'dummy-google-token-dup': 'dummy-google-user-id',
-            }, UserType.GOOGLE),
+        "third_party": {
+            "facebook": DummyThirdPartyRequest(
+                {
+                    "dummy-facebook-token": "dummy-facebook-user-id",
+                    "dummy-facebook-token-dup": "dummy-facebook-user-id",
+                },
+                UserType.FACEBOOK,
+            ),
+            "kakao": DummyThirdPartyRequest(
+                {
+                    "dummy-kakao-token": "dummy-kakao-user-id",
+                    "dummy-kakao-token-dup": "dummy-kakao-user-id",
+                },
+                UserType.KAKAO,
+            ),
+            "apple": DummyThirdPartyRequest(
+                {
+                    "dummy-apple-token": "dummy-apple-user-id",
+                    "dummy-apple-token-dup": "dummy-apple-user-id",
+                },
+                UserType.APPLE,
+            ),
+            "google": DummyThirdPartyRequest(
+                {
+                    "dummy-google-token": "dummy-google-user-id",
+                    "dummy-google-token-dup": "dummy-google-user-id",
+                },
+                UserType.GOOGLE,
+            ),
         },
     }
     secret = {
-        'jwt_secret': config.api_server.jwt_secret,
-        'internal_api_keys': config.api_server.internal_api_keys,
+        "jwt_secret": config.api_server.jwt_secret,
+        "internal_api_keys": config.api_server.internal_api_keys,
     }
     user_creation_callback_handler = DummyCallbackHandler()
     user_update_callback_handler = DummyCallbackHandler()
 
     resource_list: Dict[str, BaseResource] = {
-        '/users': UsersHttpResource(
+        "/users": UsersHttpResource(
             user_creation_callback_handler=user_creation_callback_handler,
             user_update_callback_handler=user_update_callback_handler,
             user_repository=user_repository,
             secret=secret,
             external=external,
         ),
-        '/token': TokenHttpResource(
+        "/token": TokenHttpResource(
             user_repository=user_repository,
             token_repository=token_repository,
             secret=secret,
             external=external,
         ),
-        '/internal': InternalHttpResource(
+        "/internal": InternalHttpResource(
             user_repository=user_repository,
             secret=secret,
         ),
@@ -99,9 +111,9 @@ async def application():
     async def cleanup(request):
         await User.all().delete()
         await Token.all().delete()
-        return json_response(result={'status': 'done'})
+        return json_response(result={"status": "done"})
 
-    app.router.add_get('/storage/clean-up', cleanup)
+    app.router.add_get("/storage/clean-up", cleanup)
 
     for path, resource in resource_list.items():
         subapp = web.Application(logger=logger)
@@ -109,7 +121,7 @@ async def application():
         plugin_app(app, path, subapp)
 
     cors = aiohttp_cors.setup(app)
-    allow_url = '*'
+    allow_url = "*"
 
     for route in list(app.router.routes()):
         cors.add(
@@ -117,10 +129,10 @@ async def application():
             {
                 allow_url: aiohttp_cors.ResourceOptions(
                     allow_credentials=True,
-                    allow_headers='*',
-                    allow_methods=[route.method]
+                    allow_headers="*",
+                    allow_methods=[route.method],
                 )
-            }
+            },
         )
 
     return app

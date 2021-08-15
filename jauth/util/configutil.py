@@ -28,15 +28,15 @@ def override_dict(d: dict, u: dict):
 
 
 def get_config(config_path: str) -> dict:
-    config_env = os.environ['ENV']
+    config_env = os.environ["ENV"]
 
     config = override_dict(
-        read_json(f'{config_path}/default.json'),
-        read_json(f'{config_path}/{config_env}.json'),
+        read_json(f"{config_path}/default.json"),
+        read_json(f"{config_path}/{config_env}.json"),
     )
 
     for key, value in os.environ.items():
-        attribute = key.lower().split('__')
+        attribute = key.lower().split("__")
         replace_key(config, attribute, value)
 
     return config

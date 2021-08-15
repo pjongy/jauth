@@ -1,5 +1,5 @@
 class TokenError(Exception):
-    message = 'unknown token error'
+    message = "unknown token error"
 
     def __init__(self, *args):
         if not args:
@@ -9,12 +9,12 @@ class TokenError(Exception):
 
 
 class TokenExpiredException(TokenError):
-    message = 'token expired'
+    message = "token expired"
 
 
 class InvalidTokenException(TokenError):
-    message = 'invalid token'
+    message = "invalid token"
 
 
 class TokenNotDeliveredError(TokenError):
-    message = 'token is not delivered'
+    message = "token is not delivered"

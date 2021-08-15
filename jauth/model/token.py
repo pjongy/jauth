@@ -8,7 +8,7 @@ from jauth.model.mixin import TimestampMixin
 
 class Token(Model, TimestampMixin):
     class Meta:
-        table = 'token'
+        table = "token"
 
     id: UUID = fields.UUIDField(pk=True)
     user_id: UUID = fields.UUIDField()

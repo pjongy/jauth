@@ -11,21 +11,21 @@ from jauth.structure.datetime_range import DatetimeRange
 
 def user_model_to_dict(row: User):
     user_dict = {
-        'id': row.id,
-        'email': row.email,
-        'type': row.type,
-        'status': row.status,
-        'extra': row.extra,
-        'is_email_verified': row.is_email_verified,
-        'created_at': row.created_at,
-        'modified_at': row.modified_at,
+        "id": row.id,
+        "email": row.email,
+        "type": row.type,
+        "status": row.status,
+        "extra": row.extra,
+        "is_email_verified": row.is_email_verified,
+        "created_at": row.created_at,
+        "modified_at": row.modified_at,
     }
 
     if row.type == UserType.EMAIL:
-        user_dict['account'] = row.account
+        user_dict["account"] = row.account
 
     if row.type != UserType.EMAIL:
-        user_dict['third_party_user_id'] = row.third_party_user_id
+        user_dict["third_party_user_id"] = row.third_party_user_id
 
     return user_dict
 
@@ -37,21 +37,15 @@ def _user_relational_query_set(query_set: QuerySet[User]) -> QuerySet[User]:
 class UserRepositoryImpl(UserRepository):
     async def find_user_by_id(self, _id: str) -> User:
         return await _user_relational_query_set(
-            User.filter(
-                id=_id
-            ).order_by(
-                'modified_at', 'created_at'
-            )
+            User.filter(id=_id).order_by("modified_at", "created_at")
         ).first()
 
     async def find_user_by_account(self, account: str) -> User:
-        return await _user_relational_query_set(
-            User.filter(
-                account=account
-            )
-        ).first()
+        return await _user_relational_query_set(User.filter(account=account)).first()
 
-    async def find_user_by_third_party_user_id(self, user_type: UserType, third_party_user_id: str) -> User:
+    async def find_user_by_third_party_user_id(
+        self, user_type: UserType, third_party_user_id: str
+    ) -> User:
         return await _user_relational_query_set(
             User.filter(
                 third_party_user_id=third_party_user_id,
@@ -70,7 +64,7 @@ class UserRepositoryImpl(UserRepository):
         size: int = 10,
         order_bys: List[str] = (),
         status: List[int] = (),
-        types: List[int] = ()
+        types: List[int] = (),
     ) -> Tuple[int, List[User]]:
         if not status:
             status = [UserStatus.NORMAL]
@@ -79,39 +73,34 @@ class UserRepositoryImpl(UserRepository):
 
         filters = []
         if extra_text:
-            filters.append(Q(
-                *[Q(extra__contains=word) for word in extra_text],
-                join_type='OR'
-            ))
+            filters.append(
+                Q(*[Q(extra__contains=word) for word in extra_text], join_type="OR")
+            )
 
         if emails:
-            filters.append(Q(
-                *[Q(email=email) for email in emails],
-                join_type='OR'
-            ))
+            filters.append(Q(*[Q(email=email) for email in emails], join_type="OR"))
 
         if created_at_range:
-            filters.append(Q(
-                created_at__gte=created_at_range.start,
-                created_at__lte=created_at_range.end
-            ))
+            filters.append(
+                Q(
+                    created_at__gte=created_at_range.start,
+                    created_at__lte=created_at_range.end,
+                )
+            )
 
         if modified_at_range:
-            filters.append(Q(
-                modified_at__gte=modified_at_range.start,
-                modified_at__lte=modified_at_range.end
-            ))
+            filters.append(
+                Q(
+                    modified_at__gte=modified_at_range.start,
+                    modified_at__lte=modified_at_range.end,
+                )
+            )
 
         if types:
-            filters.append(Q(
-                *[Q(type=type_) for type_ in types],
-                join_type='OR'
-            ))
+            filters.append(Q(*[Q(type=type_) for type_ in types], join_type="OR"))
 
         query_set = _user_relational_query_set(
-            User.filter(
-                Q(*filters)
-            ).filter(status__in=status)
+            User.filter(Q(*filters)).filter(status__in=status)
         ).all()
 
         for order_by in order_bys:
@@ -119,7 +108,7 @@ class UserRepositoryImpl(UserRepository):
                 query_set = query_set.order_by(order_by)
         return (
             await query_set.count(),
-            await query_set.offset(start).limit(size).all()
+            await query_set.offset(start).limit(size).all(),
         )
 
     async def create_user(
@@ -129,7 +118,7 @@ class UserRepositoryImpl(UserRepository):
         account: str = None,
         hashed_password: str = None,
         third_party_user_id: str = None,
-        extra: dict = None
+        extra: dict = None,
     ) -> User:
         if extra is None:
             extra = {}
@@ -143,13 +132,5 @@ class UserRepositoryImpl(UserRepository):
             extra=extra,
         )
 
-    async def update_user(
-        self,
-        user_id: str,
-        **kwargs
-    ) -> int:
-        return await User.filter(
-            id=user_id
-        ).update(
-            **kwargs
-        )
+    async def update_user(self, user_id: str, **kwargs) -> int:
+        return await User.filter(id=user_id).update(**kwargs)

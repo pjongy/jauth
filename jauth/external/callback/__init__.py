@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class BaseCallbackMessage(BaseModel):
-    issuer: str = 'jauth'
+    issuer: str = "jauth"
     token: str
     type: str
     issued_at: int

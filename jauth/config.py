@@ -7,16 +7,19 @@ from jauth.util.configutil import get_config
 
 
 class Config:
-    @deserialize.default('internal_api_keys', [])
-    @deserialize.parser('internal_api_keys', lambda arg: arg.split(','))
-    @deserialize.default('event_callback_urls', [])
-    @deserialize.parser('event_callback_urls', lambda arg: [url_set.split('|')[:2] for url_set in arg.split(',')])
-    @deserialize.default('port', 8080)
-    @deserialize.parser('port', int)
-    @deserialize.default('logging_level', 'DEBUG')
+    @deserialize.default("internal_api_keys", [])
+    @deserialize.parser("internal_api_keys", lambda arg: arg.split(","))
+    @deserialize.default("event_callback_urls", [])
+    @deserialize.parser(
+        "event_callback_urls",
+        lambda arg: [url_set.split("|")[:2] for url_set in arg.split(",")],
+    )
+    @deserialize.default("port", 8080)
+    @deserialize.parser("port", int)
+    @deserialize.default("logging_level", "DEBUG")
     class APIServer:
-        @deserialize.default('port', 3306)
-        @deserialize.parser('port', int)
+        @deserialize.default("port", 3306)
+        @deserialize.parser("port", int)
         class MySQL:
             host: str
             port: int
@@ -38,8 +41,6 @@ class Config:
     api_server: APIServer
 
 
-config_path = f'{Path(__file__).resolve().parent}/config'
+config_path = f"{Path(__file__).resolve().parent}/config"
 
-config: Config = deserialize.deserialize(
-    Config, get_config(config_path)
-)
+config: Config = deserialize.deserialize(Config, get_config(config_path))

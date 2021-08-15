@@ -13,11 +13,7 @@ def _token_relational_query_set(query_set: QuerySet[Token]) -> QuerySet[Token]:
 class TokenRepositoryImpl(TokenRepository):
     async def find_token_by_id(self, _id: str) -> Token:
         return await _token_relational_query_set(
-            Token.filter(
-                id=_id
-            ).order_by(
-                'modified_at', 'created_at'
-            )
+            Token.filter(id=_id).order_by("modified_at", "created_at")
         ).first()
 
     async def create_token(self, user_id: str) -> Token:
@@ -25,9 +21,5 @@ class TokenRepositoryImpl(TokenRepository):
 
     async def delete_token(self, token_id: str) -> int:
         return await _token_relational_query_set(
-            Token.filter(
-                id=token_id
-            ).order_by(
-                'modified_at', 'created_at'
-            )
+            Token.filter(id=token_id).order_by("modified_at", "created_at")
         ).delete()

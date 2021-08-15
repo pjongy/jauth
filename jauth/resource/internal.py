@@ -28,15 +28,15 @@ class CreatePasswordResetTokenRequest:
     user_id: str
 
 
-@deserialize.default('start', 0)
-@deserialize.parser('start', int)
-@deserialize.default('size', 10)
-@deserialize.parser('size', int)
-@deserialize.default('order_bys', [])
-@deserialize.default('extras', [])
-@deserialize.default('emails', [])
-@deserialize.default('status', [])
-@deserialize.default('types', [])
+@deserialize.default("start", 0)
+@deserialize.parser("start", int)
+@deserialize.default("size", 10)
+@deserialize.parser("size", int)
+@deserialize.default("order_bys", [])
+@deserialize.default("extras", [])
+@deserialize.default("emails", [])
+@deserialize.default("status", [])
+@deserialize.default("types", [])
 class SearchUserRequest:
     emails: List[str]
     extras: List[str]
@@ -54,16 +54,20 @@ class InternalHttpResource(BaseResource):
 
     def __init__(self, user_repository: UserRepository, secret: dict):
         self.user_repository = user_repository
-        self.jwt_secret = secret['jwt_secret']
-        self.internal_api_keys: List[str] = secret['internal_api_keys']
+        self.jwt_secret = secret["jwt_secret"]
+        self.internal_api_keys: List[str] = secret["internal_api_keys"]
 
     def route(self, router: UrlDispatcher):
-        router.add_route('POST', '/users:search', self.search_users)
-        router.add_route('POST', '/token/email_verify', self.generate_email_verifying_token)
-        router.add_route('POST', '/token/password_reset', self.generate_password_reset_token)
+        router.add_route("POST", "/users:search", self.search_users)
+        router.add_route(
+            "POST", "/token/email_verify", self.generate_email_verifying_token
+        )
+        router.add_route(
+            "POST", "/token/password_reset", self.generate_password_reset_token
+        )
 
     def _check_server_key(self, request: Request):
-        x_server_key = request.headers.get('X-Server-Key')
+        x_server_key = request.headers.get("X-Server-Key")
         if x_server_key not in self.internal_api_keys:
             raise ServerKeyError()
 
@@ -73,17 +77,20 @@ class InternalHttpResource(BaseResource):
         self._check_server_key(request=request)
 
         request_body: CreateEmailVerifyingTokenRequest = convert_request(
-            CreateEmailVerifyingTokenRequest, await request.json())
+            CreateEmailVerifyingTokenRequest, await request.json()
+        )
         user: User = await self.user_repository.find_user_by_id(request_body.user_id)
         if not user:
-            return json_response(
-                reason=f'user not found', status=404)
+            return json_response(reason=f"user not found", status=404)
 
-        user_claim: VerifyUserEmailClaim = deserialize.deserialize(VerifyUserEmailClaim, {
-            'id': str(user.id),
-            'type': int(user.type),
-            'exp': time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
-        })
+        user_claim: VerifyUserEmailClaim = deserialize.deserialize(
+            VerifyUserEmailClaim,
+            {
+                "id": str(user.id),
+                "type": int(user.type),
+                "exp": time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
+            },
+        )
         token = user_claim.to_jwt(self.jwt_secret)
 
         return json_response(result=token)
@@ -94,21 +101,25 @@ class InternalHttpResource(BaseResource):
         self._check_server_key(request=request)
 
         request_body: CreatePasswordResetTokenRequest = convert_request(
-            CreatePasswordResetTokenRequest, await request.json())
+            CreatePasswordResetTokenRequest, await request.json()
+        )
         user: User = await self.user_repository.find_user_by_id(request_body.user_id)
         if not user:
-            return json_response(
-                reason=f'user not found', status=404)
+            return json_response(reason=f"user not found", status=404)
 
         if user.type != UserType.EMAIL:
             return json_response(
-                reason=f'only email user can reset password', status=400)
+                reason=f"only email user can reset password", status=400
+            )
 
-        user_claim: ResetPasswordClaim = deserialize.deserialize(ResetPasswordClaim, {
-            'id': str(user.id),
-            'type': int(user.type),
-            'exp': time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
-        })
+        user_claim: ResetPasswordClaim = deserialize.deserialize(
+            ResetPasswordClaim,
+            {
+                "id": str(user.id),
+                "type": int(user.type),
+                "exp": time.time() + self.ACCESS_TOKEN_EXPIRE_TIME,
+            },
+        )
         token = user_claim.to_jwt(self.jwt_secret)
 
         return json_response(result=token)
@@ -119,14 +130,19 @@ class InternalHttpResource(BaseResource):
         self._check_server_key(request=request)
 
         available_order_bys = {
-            'id', '-id',
-            'email', '-email',
-            'created_at', '-created_at',
-            'modified_at', '-modified_at'
+            "id",
+            "-id",
+            "email",
+            "-email",
+            "created_at",
+            "-created_at",
+            "modified_at",
+            "-modified_at",
         }
 
         request_body: SearchUserRequest = convert_request(
-            SearchUserRequest, await request.json())
+            SearchUserRequest, await request.json()
+        )
 
         total, users = await self.user_repository.search_users(
             emails=request_body.emails,
@@ -139,10 +155,9 @@ class InternalHttpResource(BaseResource):
             status=request_body.status,
             types=request_body.types,
         )
-        return json_response(result={
-            'total': total,
-            'users': [
-                user_model_to_dict(user)
-                for user in users
-            ]
-        })
+        return json_response(
+            result={
+                "total": total,
+                "users": [user_model_to_dict(user) for user in users],
+            }
+        )

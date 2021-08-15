@@ -24,7 +24,7 @@ class UserStatus(enum.IntEnum):
 
 class User(Model, TimestampMixin):
     class Meta:
-        table = 'user'
+        table = "user"
 
     id: UUID = fields.UUIDField(pk=True)
     email = fields.CharField(max_length=255)

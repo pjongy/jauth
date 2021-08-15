@@ -31,19 +31,18 @@ def json_response(
     if headers is None:
         headers = {}
 
-    assert (result is None) ^ (
-        reason is None), 'Either result or reason should be set'
+    assert (result is None) ^ (reason is None), "Either result or reason should be set"
 
     success = reason is None
     response = {
-        'success': success,
-        'result': result,
-        'reason': reason,
+        "success": success,
+        "result": result,
+        "reason": reason,
     }
 
     return web.Response(
         body=json.dumps(response, cls=ManualJSONEncoder),
-        content_type='application/json',
+        content_type="application/json",
         status=status,
         headers=headers,
     )
@@ -51,9 +50,7 @@ def json_response(
 
 def convert_request(class_, dict_):
     try:
-        return deserialize.deserialize(
-            class_, dict_
-        )
+        return deserialize.deserialize(class_, dict_)
     except TypeError as error:
         raise IncompleteParameterError(error)
     except deserialize.exceptions.DeserializeException as error:

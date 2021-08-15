@@ -40,40 +40,44 @@ async def application():
         port=mysql_config.port,
         user=mysql_config.user,
         password=mysql_config.password,
-        db=mysql_config.database
+        db=mysql_config.database,
     )
     user_repository = UserRepositoryImpl()
     token_repository = TokenRepositoryImpl()
     external = {
-        'third_party': {
-            'facebook': FacebookToken(),
-            'kakao': KakaoToken(),
-            'apple': AppleToken(),
-            'google': GoogleToken(),
+        "third_party": {
+            "facebook": FacebookToken(),
+            "kakao": KakaoToken(),
+            "apple": AppleToken(),
+            "google": GoogleToken(),
         },
     }
     secret = {
-        'jwt_secret': config.api_server.jwt_secret,
-        'internal_api_keys': config.api_server.internal_api_keys,
+        "jwt_secret": config.api_server.jwt_secret,
+        "internal_api_keys": config.api_server.internal_api_keys,
     }
-    user_creation_callback_handler = UserCreationCallbackHandler(config.api_server.event_callback_urls)
-    user_update_callback_handler = UserUpdateCallbackHandler(config.api_server.event_callback_urls)
+    user_creation_callback_handler = UserCreationCallbackHandler(
+        config.api_server.event_callback_urls
+    )
+    user_update_callback_handler = UserUpdateCallbackHandler(
+        config.api_server.event_callback_urls
+    )
 
     resource_list: Dict[str, BaseResource] = {
-        '/users': UsersHttpResource(
+        "/users": UsersHttpResource(
             user_creation_callback_handler=user_creation_callback_handler,
             user_update_callback_handler=user_update_callback_handler,
             user_repository=user_repository,
             secret=secret,
             external=external,
         ),
-        '/token': TokenHttpResource(
+        "/token": TokenHttpResource(
             user_repository=user_repository,
             token_repository=token_repository,
             secret=secret,
             external=external,
         ),
-        '/internal': InternalHttpResource(
+        "/internal": InternalHttpResource(
             user_repository=user_repository,
             secret=secret,
         ),
@@ -85,7 +89,7 @@ async def application():
         plugin_app(app, path, subapp)
 
     cors = aiohttp_cors.setup(app)
-    allow_url = '*'
+    allow_url = "*"
 
     for route in list(app.router.routes()):
         cors.add(
@@ -93,10 +97,10 @@ async def application():
             {
                 allow_url: aiohttp_cors.ResourceOptions(
                     allow_credentials=True,
-                    allow_headers='*',
-                    allow_methods=[route.method]
+                    allow_headers="*",
+                    allow_methods=[route.method],
                 )
-            }
+            },
         )
 
     return app

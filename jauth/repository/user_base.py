@@ -16,7 +16,9 @@ class UserRepository(BaseRepository, abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def find_user_by_third_party_user_id(self, user_type: UserType, third_party_user_id: str) -> User:
+    async def find_user_by_third_party_user_id(
+        self, user_type: UserType, third_party_user_id: str
+    ) -> User:
         pass
 
     @abc.abstractmethod
@@ -30,7 +32,7 @@ class UserRepository(BaseRepository, abc.ABC):
         size: int = 10,
         order_bys: List[str] = (),
         status: List[int] = (),
-        types: List[int] = ()
+        types: List[int] = (),
     ) -> Tuple[int, List[User]]:
         pass
 
@@ -42,14 +44,10 @@ class UserRepository(BaseRepository, abc.ABC):
         account: str = None,
         hashed_password: str = None,
         third_party_user_id: str = None,
-        extra: dict = None
+        extra: dict = None,
     ) -> User:
         pass
 
     @abc.abstractmethod
-    async def update_user(
-        self,
-        user_id: str,
-        **kwargs
-    ) -> int:
+    async def update_user(self, user_id: str, **kwargs) -> int:
         pass

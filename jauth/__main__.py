@@ -7,7 +7,7 @@ from jauth.application import application
 from jauth.config import config
 from jauth.util.logger.logger import get_logger
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     loop = asyncio.ProactorEventLoop()
     asyncio.set_event_loop(loop)
 
@@ -19,7 +19,7 @@ async def main():
     port = config.api_server.port
     site = web.TCPSite(runner, port=port, backlog=1024)
     await site.start()
-    logger.debug(f'Run server / {port}')
+    logger.debug(f"Run server / {port}")
 
     # Infinite loop for maintaining server alive
     # https://github.com/aio-libs/aiohttp/blob/master/aiohttp/web.py#L365
@@ -27,7 +27,7 @@ async def main():
         await asyncio.sleep(100 * 3600)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
     loop.run_forever()
